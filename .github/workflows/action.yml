@@ -1,6 +1,10 @@
 name: GitHub Actions
 
-on: [push]
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 0 1 * *'
 
 jobs:
   build:
@@ -145,9 +149,3 @@ jobs:
           cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON ${{ matrix.configure-opts }} -DCMAKE_FIND_FRAMEWORK=NEVER
           cmake --build .
           ctest -V
-
-      - name: Check documentation
-        if: startsWith(matrix.os,'ubuntu') && startsWith(matrix.build-system,'autotools')
-        run: |
-          xmllint --valid --noout doc/html/*.html;
-          xmllint --valid --noout doc/html/api/*.html;
