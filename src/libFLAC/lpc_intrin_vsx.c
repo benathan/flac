@@ -47,11 +47,12 @@
 
 #ifdef FLAC__HAS_TARGET_POWER8
 __attribute__((target("cpu=power8")))
-void FLAC__lpc_compute_autocorrelation_intrin_power8_vsx_lag_16(const FLAC__real data[], uint32_t data_len, uint32_t lag, FLAC__real autoc[])
+void FLAC__lpc_compute_autocorrelation_intrin_power8_vsx_lag_16(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[])
 {
 	long i;
 	long limit = (long)data_len - 16;
 	const FLAC__real *base;
+	FLAC__real _autoc[FLAC__MAX_LPC_ORDER+1];
 	vector float sum0 = { 0.0f, 0.0f, 0.0f, 0.0f};
 	vector float sum1 = { 0.0f, 0.0f, 0.0f, 0.0f};
 	vector float sum2 = { 0.0f, 0.0f, 0.0f, 0.0f};
@@ -167,26 +168,30 @@ void FLAC__lpc_compute_autocorrelation_intrin_power8_vsx_lag_16(const FLAC__real
 		sum3 += d3 * d;
 	}
 
-	vec_vsx_st(sum0, 0, autoc);
-	vec_vsx_st(sum1, 16, autoc);
-	vec_vsx_st(sum2, 32, autoc);
-	vec_vsx_st(sum3, 48, autoc);
+	vec_vsx_st(sum0, 0, _autoc);
+	vec_vsx_st(sum1, 16, _autoc);
+	vec_vsx_st(sum2, 32, _autoc);
+	vec_vsx_st(sum3, 48, _autoc);
 
 	for (; i < (long)data_len; i++) {
 		uint32_t coeff;
 
 		FLAC__real d = data[i];
 		for (coeff = 0; coeff < data_len - i; coeff++)
-			autoc[coeff] += d * data[i+coeff];
+			_autoc[coeff] += d * data[i+coeff];
+	}
+	for(i = 0; i < 16; i++){
+		autoc[i] = _autoc[i];
 	}
 }
 
 __attribute__((target("cpu=power8")))
-void FLAC__lpc_compute_autocorrelation_intrin_power8_vsx_lag_12(const FLAC__real data[], uint32_t data_len, uint32_t lag, FLAC__real autoc[])
+void FLAC__lpc_compute_autocorrelation_intrin_power8_vsx_lag_12(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[])
 {
 	long i;
 	long limit = (long)data_len - 12;
 	const FLAC__real *base;
+    FLAC__real _autoc[FLAC__MAX_LPC_ORDER+1];
 	vector float sum0 = { 0.0f, 0.0f, 0.0f, 0.0f};
 	vector float sum1 = { 0.0f, 0.0f, 0.0f, 0.0f};
 	vector float sum2 = { 0.0f, 0.0f, 0.0f, 0.0f};
@@ -287,25 +292,29 @@ void FLAC__lpc_compute_autocorrelation_intrin_power8_vsx_lag_12(const FLAC__real
 		sum2 += d2 * d;
 	}
 
-	vec_vsx_st(sum0, 0, autoc);
-	vec_vsx_st(sum1, 16, autoc);
-	vec_vsx_st(sum2, 32, autoc);
+	vec_vsx_st(sum0, 0, _autoc);
+	vec_vsx_st(sum1, 16, _autoc);
+	vec_vsx_st(sum2, 32, _autoc);
 
 	for (; i < (long)data_len; i++) {
 		uint32_t coeff;
 
 		FLAC__real d = data[i];
 		for (coeff = 0; coeff < data_len - i; coeff++)
-			autoc[coeff] += d * data[i+coeff];
+			_autoc[coeff] += d * data[i+coeff];
+	}
+	for(i = 0; i < 12; i++){
+		autoc[i] = _autoc[i];
 	}
 }
 
 __attribute__((target("cpu=power8")))
-void FLAC__lpc_compute_autocorrelation_intrin_power8_vsx_lag_8(const FLAC__real data[], uint32_t data_len, uint32_t lag, FLAC__real autoc[])
+void FLAC__lpc_compute_autocorrelation_intrin_power8_vsx_lag_8(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[])
 {
 	long i;
 	long limit = (long)data_len - 8;
 	const FLAC__real *base;
+    FLAC__real _autoc[FLAC__MAX_LPC_ORDER+1];
 	vector float sum0 = { 0.0f, 0.0f, 0.0f, 0.0f};
 	vector float sum1 = { 0.0f, 0.0f, 0.0f, 0.0f};
 	vector float sum10 = { 0.0f, 0.0f, 0.0f, 0.0f};
@@ -391,24 +400,28 @@ void FLAC__lpc_compute_autocorrelation_intrin_power8_vsx_lag_8(const FLAC__real 
 		sum1 += d1 * d;
 	}
 
-	vec_vsx_st(sum0, 0, autoc);
-	vec_vsx_st(sum1, 16, autoc);
+	vec_vsx_st(sum0, 0, _autoc);
+	vec_vsx_st(sum1, 16, _autoc);
 
 	for (; i < (long)data_len; i++) {
 		uint32_t coeff;
 
 		FLAC__real d = data[i];
 		for (coeff = 0; coeff < data_len - i; coeff++)
-			autoc[coeff] += d * data[i+coeff];
+			_autoc[coeff] += d * data[i+coeff];
+	}
+	for(i = 0; i < 8; i++){
+		autoc[i] = _autoc[i];
 	}
 }
 
 __attribute__((target("cpu=power8")))
-void FLAC__lpc_compute_autocorrelation_intrin_power8_vsx_lag_4(const FLAC__real data[], uint32_t data_len, uint32_t lag, FLAC__real autoc[])
+void FLAC__lpc_compute_autocorrelation_intrin_power8_vsx_lag_4(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[])
 {
 	long i;
 	long limit = (long)data_len - 4;
 	const FLAC__real *base;
+    FLAC__real _autoc[FLAC__MAX_LPC_ORDER+1];
 	vector float sum0 = { 0.0f, 0.0f, 0.0f, 0.0f};
 	vector float sum10 = { 0.0f, 0.0f, 0.0f, 0.0f};
 	vector float sum20 = { 0.0f, 0.0f, 0.0f, 0.0f};
@@ -479,25 +492,29 @@ void FLAC__lpc_compute_autocorrelation_intrin_power8_vsx_lag_4(const FLAC__real 
 		sum0 += d0 * d;
 	}
 
-	vec_vsx_st(sum0, 0, autoc);
+	vec_vsx_st(sum0, 0, _autoc);
 
 	for (; i < (long)data_len; i++) {
 		uint32_t coeff;
 
 		FLAC__real d = data[i];
 		for (coeff = 0; coeff < data_len - i; coeff++)
-			autoc[coeff] += d * data[i+coeff];
+			_autoc[coeff] += d * data[i+coeff];
+	}
+	for(i = 0; i < 4; i++){
+		autoc[i] = _autoc[i];
 	}
 }
 #endif /* FLAC__HAS_TARGET_POWER8 */
 
 #ifdef FLAC__HAS_TARGET_POWER9
 __attribute__((target("cpu=power9")))
-void FLAC__lpc_compute_autocorrelation_intrin_power9_vsx_lag_16(const FLAC__real data[], uint32_t data_len, uint32_t lag, FLAC__real autoc[])
+void FLAC__lpc_compute_autocorrelation_intrin_power9_vsx_lag_16(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[])
 {
 	long i;
 	long limit = (long)data_len - 16;
 	const FLAC__real *base;
+    FLAC__real _autoc[FLAC__MAX_LPC_ORDER+1];
 	vector float sum0 = { 0.0f, 0.0f, 0.0f, 0.0f};
 	vector float sum1 = { 0.0f, 0.0f, 0.0f, 0.0f};
 	vector float sum2 = { 0.0f, 0.0f, 0.0f, 0.0f};
@@ -613,26 +630,30 @@ void FLAC__lpc_compute_autocorrelation_intrin_power9_vsx_lag_16(const FLAC__real
 		sum3 += d3 * d;
 	}
 
-	vec_vsx_st(sum0, 0, autoc);
-	vec_vsx_st(sum1, 16, autoc);
-	vec_vsx_st(sum2, 32, autoc);
-	vec_vsx_st(sum3, 48, autoc);
+	vec_vsx_st(sum0, 0, _autoc);
+	vec_vsx_st(sum1, 16, _autoc);
+	vec_vsx_st(sum2, 32, _autoc);
+	vec_vsx_st(sum3, 48, _autoc);
 
 	for (; i < (long)data_len; i++) {
 		uint32_t coeff;
 
 		FLAC__real d = data[i];
 		for (coeff = 0; coeff < data_len - i; coeff++)
-			autoc[coeff] += d * data[i+coeff];
+			_autoc[coeff] += d * data[i+coeff];
+	}
+	for(i = 0; i < 16; i++){
+		autoc[i] = _autoc[i];
 	}
 }
 
 __attribute__((target("cpu=power9")))
-void FLAC__lpc_compute_autocorrelation_intrin_power9_vsx_lag_12(const FLAC__real data[], uint32_t data_len, uint32_t lag, FLAC__real autoc[])
+void FLAC__lpc_compute_autocorrelation_intrin_power9_vsx_lag_12(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[])
 {
 	long i;
 	long limit = (long)data_len - 12;
 	const FLAC__real *base;
+    FLAC__real _autoc[FLAC__MAX_LPC_ORDER+1];
 	vector float sum0 = { 0.0f, 0.0f, 0.0f, 0.0f};
 	vector float sum1 = { 0.0f, 0.0f, 0.0f, 0.0f};
 	vector float sum2 = { 0.0f, 0.0f, 0.0f, 0.0f};
@@ -733,25 +754,29 @@ void FLAC__lpc_compute_autocorrelation_intrin_power9_vsx_lag_12(const FLAC__real
 		sum2 += d2 * d;
 	}
 
-	vec_vsx_st(sum0, 0, autoc);
-	vec_vsx_st(sum1, 16, autoc);
-	vec_vsx_st(sum2, 32, autoc);
+	vec_vsx_st(sum0, 0, _autoc);
+	vec_vsx_st(sum1, 16, _autoc);
+	vec_vsx_st(sum2, 32, _autoc);
 
 	for (; i < (long)data_len; i++) {
 		uint32_t coeff;
 
 		FLAC__real d = data[i];
 		for (coeff = 0; coeff < data_len - i; coeff++)
-			autoc[coeff] += d * data[i+coeff];
+			_autoc[coeff] += d * data[i+coeff];
+	}
+	for(i = 0; i < 12; i++){
+		autoc[i] = _autoc[i];
 	}
 }
 
 __attribute__((target("cpu=power9")))
-void FLAC__lpc_compute_autocorrelation_intrin_power9_vsx_lag_8(const FLAC__real data[], uint32_t data_len, uint32_t lag, FLAC__real autoc[])
+void FLAC__lpc_compute_autocorrelation_intrin_power9_vsx_lag_8(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[])
 {
 	long i;
 	long limit = (long)data_len - 8;
 	const FLAC__real *base;
+    FLAC__real _autoc[FLAC__MAX_LPC_ORDER+1];
 	vector float sum0 = { 0.0f, 0.0f, 0.0f, 0.0f};
 	vector float sum1 = { 0.0f, 0.0f, 0.0f, 0.0f};
 	vector float sum10 = { 0.0f, 0.0f, 0.0f, 0.0f};
@@ -837,24 +862,28 @@ void FLAC__lpc_compute_autocorrelation_intrin_power9_vsx_lag_8(const FLAC__real 
 		sum1 += d1 * d;
 	}
 
-	vec_vsx_st(sum0, 0, autoc);
-	vec_vsx_st(sum1, 16, autoc);
+	vec_vsx_st(sum0, 0, _autoc);
+	vec_vsx_st(sum1, 16, _autoc);
 
 	for (; i < (long)data_len; i++) {
 		uint32_t coeff;
 
 		FLAC__real d = data[i];
 		for (coeff = 0; coeff < data_len - i; coeff++)
-			autoc[coeff] += d * data[i+coeff];
+			_autoc[coeff] += d * data[i+coeff];
+	}
+	for(i = 0; i < 8; i++){
+		autoc[i] = _autoc[i];
 	}
 }
 
 __attribute__((target("cpu=power9")))
-void FLAC__lpc_compute_autocorrelation_intrin_power9_vsx_lag_4(const FLAC__real data[], uint32_t data_len, uint32_t lag, FLAC__real autoc[])
+void FLAC__lpc_compute_autocorrelation_intrin_power9_vsx_lag_4(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[])
 {
 	long i;
 	long limit = (long)data_len - 4;
 	const FLAC__real *base;
+    FLAC__real _autoc[FLAC__MAX_LPC_ORDER+1];
 	vector float sum0 = { 0.0f, 0.0f, 0.0f, 0.0f};
 	vector float sum10 = { 0.0f, 0.0f, 0.0f, 0.0f};
 	vector float sum20 = { 0.0f, 0.0f, 0.0f, 0.0f};
@@ -925,14 +954,17 @@ void FLAC__lpc_compute_autocorrelation_intrin_power9_vsx_lag_4(const FLAC__real 
 		sum0 += d0 * d;
 	}
 
-	vec_vsx_st(sum0, 0, autoc);
+	vec_vsx_st(sum0, 0, _autoc);
 
 	for (; i < (long)data_len; i++) {
 		uint32_t coeff;
 
 		FLAC__real d = data[i];
 		for (coeff = 0; coeff < data_len - i; coeff++)
-			autoc[coeff] += d * data[i+coeff];
+			_autoc[coeff] += d * data[i+coeff];
+	}
+	for(i = 0; i < 4; i++){
+		autoc[i] = _autoc[i];
 	}
 }
 #endif /* FLAC__HAS_TARGET_POWER9 */
