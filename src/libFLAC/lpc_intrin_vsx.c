@@ -52,38 +52,49 @@ void FLAC__lpc_compute_autocorrelation_intrin_power8_vsx_lag_16(const FLAC__real
 	long i;
 	long limit = (long)data_len - 16;
 	const FLAC__real *base;
-	FLAC__real _autoc[FLAC__MAX_LPC_ORDER+1];
-	vector float sum0 = { 0.0f, 0.0f, 0.0f, 0.0f};
-	vector float sum1 = { 0.0f, 0.0f, 0.0f, 0.0f};
-	vector float sum2 = { 0.0f, 0.0f, 0.0f, 0.0f};
-	vector float sum3 = { 0.0f, 0.0f, 0.0f, 0.0f};
-	vector float sum10 = { 0.0f, 0.0f, 0.0f, 0.0f};
-	vector float sum11 = { 0.0f, 0.0f, 0.0f, 0.0f};
-	vector float sum12 = { 0.0f, 0.0f, 0.0f, 0.0f};
-	vector float sum13 = { 0.0f, 0.0f, 0.0f, 0.0f};
-	vector float sum20 = { 0.0f, 0.0f, 0.0f, 0.0f};
-	vector float sum21 = { 0.0f, 0.0f, 0.0f, 0.0f};
-	vector float sum22 = { 0.0f, 0.0f, 0.0f, 0.0f};
-	vector float sum23 = { 0.0f, 0.0f, 0.0f, 0.0f};
-	vector float sum30 = { 0.0f, 0.0f, 0.0f, 0.0f};
-	vector float sum31 = { 0.0f, 0.0f, 0.0f, 0.0f};
-	vector float sum32 = { 0.0f, 0.0f, 0.0f, 0.0f};
-	vector float sum33 = { 0.0f, 0.0f, 0.0f, 0.0f};
+	vector double sum0 = { 0.0f, 0.0f};
+	vector double sum1 = { 0.0f, 0.0f};
+	vector double sum2 = { 0.0f, 0.0f};
+	vector double sum3 = { 0.0f, 0.0f};
+	vector double sum4 = { 0.0f, 0.0f};
+	vector double sum5 = { 0.0f, 0.0f};
+	vector double sum6 = { 0.0f, 0.0f};
+	vector double sum7 = { 0.0f, 0.0f};
+	vector double sum10 = { 0.0f, 0.0f};
+	vector double sum11 = { 0.0f, 0.0f};
+	vector double sum12 = { 0.0f, 0.0f};
+	vector double sum13 = { 0.0f, 0.0f};
+	vector double sum14 = { 0.0f, 0.0f};
+	vector double sum15 = { 0.0f, 0.0f};
+	vector double sum16 = { 0.0f, 0.0f};
+	vector double sum17 = { 0.0f, 0.0f};
+	vector double sum20 = { 0.0f, 0.0f};
+	vector double sum21 = { 0.0f, 0.0f};
+	vector double sum22 = { 0.0f, 0.0f};
+	vector double sum23 = { 0.0f, 0.0f};
+	vector double sum24 = { 0.0f, 0.0f};
+	vector double sum25 = { 0.0f, 0.0f};
+	vector double sum26 = { 0.0f, 0.0f};
+	vector double sum27 = { 0.0f, 0.0f};
+	vector double sum30 = { 0.0f, 0.0f};
+	vector double sum31 = { 0.0f, 0.0f};
+	vector double sum32 = { 0.0f, 0.0f};
+	vector double sum33 = { 0.0f, 0.0f};
+	vector double sum34 = { 0.0f, 0.0f};
+	vector double sum35 = { 0.0f, 0.0f};
+	vector double sum36 = { 0.0f, 0.0f};
+	vector double sum37 = { 0.0f, 0.0f};
 	vector float d0, d1, d2, d3, d4;
 #if WORDS_BIGENDIAN
 	vector unsigned int vsel1 = { 0x00000000, 0x00000000, 0x00000000, 0xFFFFFFFF };
 	vector unsigned int vsel2 = { 0x00000000, 0x00000000, 0xFFFFFFFF, 0xFFFFFFFF };
 	vector unsigned int vsel3 = { 0x00000000, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
-	vector unsigned int vperm1 = { 0x04050607, 0x08090A0B, 0x0C0D0E0F, 0x10111213 };
-	vector unsigned int vperm2 = { 0x08090A0B, 0x0C0D0E0F, 0x10111213, 0x14151617 };
-	vector unsigned int vperm3 = { 0x0C0D0E0F, 0x10111213, 0x14151617, 0x18191A1B };
+	vector unsigned long long vperm = { 0x08090A0B0C0D0E0F, 0x1011121314151617 };
 #else
 	vector unsigned int vsel1 = { 0xFFFFFFFF, 0x00000000, 0x00000000, 0x00000000 };
 	vector unsigned int vsel2 = { 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000, 0x00000000 };
 	vector unsigned int vsel3 = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000 };
-	vector unsigned int vperm1 = { 0x07060504, 0x0B0A0908, 0x0F0E0D0C, 0x13121110 };
-	vector unsigned int vperm2 = { 0x0B0A0908, 0x0F0E0D0C, 0x13121110, 0x17161514 };
-	vector unsigned int vperm3 = { 0x0F0E0D0C, 0x13121110, 0x17161514, 0x1B1A1918 };
+	vector unsigned long long vperm = { 0x0F0E0D0C0B0A0908, 0x1716151413121110 };
 #endif
 
 	(void) lag;
@@ -100,37 +111,69 @@ void FLAC__lpc_compute_autocorrelation_intrin_power8_vsx_lag_16(const FLAC__real
 	base += 16;
 
 	for (i = 0; i <= (limit-4); i += 4) {
-		vector float d, d0_orig = d0;
+		vector float d, mult, d0_orig = d0;
 
 		d4 = vec_vsx_ld(0, base);
 		base += 4;
 
 		d = vec_splat(d0_orig, 0);
-		sum0 += d0 * d;
-		sum1 += d1 * d;
-		sum2 += d2 * d;
-		sum3 += d3 * d;
+		mult = d0 * d;
+		sum0 += vec_doublel(mult);
+		sum1 += vec_doubleh(mult);
+		mult = d1 * d;
+		sum2 += vec_doublel(mult);
+		sum3 += vec_doubleh(mult);
+		mult = d2 * d;
+		sum4 += vec_doublel(mult);
+		sum5 += vec_doubleh(mult);
+		mult = d3 * d;
+		sum6 += vec_doublel(mult);
+		sum7 += vec_doubleh(mult);
 
 		d = vec_splat(d0_orig, 1);
 		d0 = vec_sel(d0_orig, d4, vsel1);
-		sum10 += d0 * d;
-		sum11 += d1 * d;
-		sum12 += d2 * d;
-		sum13 += d3 * d;
+		mult = d0 * d;
+		sum10 += vec_doublel(mult);
+		sum11 += vec_doubleh(mult);
+		mult = d1 * d;
+		sum12 += vec_doublel(mult);
+		sum13 += vec_doubleh(mult);
+		mult = d2 * d;
+		sum14 += vec_doublel(mult);
+		sum15 += vec_doubleh(mult);
+		mult = d3 * d;
+		sum16 += vec_doublel(mult);
+		sum17 += vec_doubleh(mult);
 
 		d = vec_splat(d0_orig, 2);
 		d0 = vec_sel(d0_orig, d4, vsel2);
-		sum20 += d0 * d;
-		sum21 += d1 * d;
-		sum22 += d2 * d;
-		sum23 += d3 * d;
+		mult = d0 * d;
+		sum20 += vec_doublel(mult);
+		sum21 += vec_doubleh(mult);
+		mult = d1 * d;
+		sum22 += vec_doublel(mult);
+		sum23 += vec_doubleh(mult);
+		mult = d2 * d;
+		sum24 += vec_doublel(mult);
+		sum25 += vec_doubleh(mult);
+		mult = d3 * d;
+		sum26 += vec_doublel(mult);
+		sum27 += vec_doubleh(mult);
 
 		d = vec_splat(d0_orig, 3);
 		d0 = vec_sel(d0_orig, d4, vsel3);
-		sum30 += d0 * d;
-		sum31 += d1 * d;
-		sum32 += d2 * d;
-		sum33 += d3 * d;
+		mult = d0 * d;
+		sum30 += vec_doublel(mult);
+		sum31 += vec_doubleh(mult);
+		mult = d1 * d;
+		sum32 += vec_doublel(mult);
+		sum33 += vec_doubleh(mult);
+		mult = d2 * d;
+		sum34 += vec_doublel(mult);
+		sum35 += vec_doubleh(mult);
+		mult = d3 * d;
+		sum36 += vec_doublel(mult);
+		sum37 += vec_doubleh(mult);
 
 		d0 = d1;
 		d1 = d2;
@@ -138,50 +181,49 @@ void FLAC__lpc_compute_autocorrelation_intrin_power8_vsx_lag_16(const FLAC__real
 		d3 = d4;
 	}
 
-	sum0 += vec_perm(sum10, sum11, (vector unsigned char)vperm1);
-	sum1 += vec_perm(sum11, sum12, (vector unsigned char)vperm1);
-	sum2 += vec_perm(sum12, sum13, (vector unsigned char)vperm1);
-	sum3 += vec_perm(sum13, sum10, (vector unsigned char)vperm1);
+	sum0 += vec_perm(sum10, sum11, (vector unsigned char)vperm);
+	sum1 += vec_perm(sum11, sum12, (vector unsigned char)vperm);
+	sum2 += vec_perm(sum12, sum13, (vector unsigned char)vperm);
+	sum3 += vec_perm(sum13, sum14, (vector unsigned char)vperm);
+	sum4 += vec_perm(sum14, sum15, (vector unsigned char)vperm);
+	sum5 += vec_perm(sum15, sum16, (vector unsigned char)vperm);
+	sum6 += vec_perm(sum16, sum17, (vector unsigned char)vperm);
+	sum7 += vec_perm(sum17, sum10, (vector unsigned char)vperm);
+	
+	sum0 += sum21;
+	sum1 += sum22;
+	sum2 += sum23;
+	sum3 += sum24;
+	sum4 += sum25;
+	sum5 += sum26;
+	sum6 += sum27;
+	sum7 += sum20;
+	
+	sum0 += vec_perm(sum31, sum32, (vector unsigned char)vperm);
+	sum1 += vec_perm(sum32, sum33, (vector unsigned char)vperm);
+	sum2 += vec_perm(sum33, sum34, (vector unsigned char)vperm);
+	sum3 += vec_perm(sum34, sum35, (vector unsigned char)vperm);
+	sum4 += vec_perm(sum35, sum36, (vector unsigned char)vperm);
+	sum5 += vec_perm(sum36, sum37, (vector unsigned char)vperm);
+	sum6 += vec_perm(sum37, sum30, (vector unsigned char)vperm);
+	sum7 += vec_perm(sum30, sum31, (vector unsigned char)vperm);
 
-	sum0 += vec_perm(sum20, sum21, (vector unsigned char)vperm2);
-	sum1 += vec_perm(sum21, sum22, (vector unsigned char)vperm2);
-	sum2 += vec_perm(sum22, sum23, (vector unsigned char)vperm2);
-	sum3 += vec_perm(sum23, sum20, (vector unsigned char)vperm2);
 
-	sum0 += vec_perm(sum30, sum31, (vector unsigned char)vperm3);
-	sum1 += vec_perm(sum31, sum32, (vector unsigned char)vperm3);
-	sum2 += vec_perm(sum32, sum33, (vector unsigned char)vperm3);
-	sum3 += vec_perm(sum33, sum30, (vector unsigned char)vperm3);
-
-	for (; i <= limit; i++) {
-		vector float d;
-
-		d0 = vec_vsx_ld(0, data+i);
-		d1 = vec_vsx_ld(16, data+i);
-		d2 = vec_vsx_ld(32, data+i);
-		d3 = vec_vsx_ld(48, data+i);
-
-		d = vec_splat(d0, 0);
-		sum0 += d0 * d;
-		sum1 += d1 * d;
-		sum2 += d2 * d;
-		sum3 += d3 * d;
-	}
-
-	vec_vsx_st(sum0, 0, _autoc);
-	vec_vsx_st(sum1, 16, _autoc);
-	vec_vsx_st(sum2, 32, _autoc);
-	vec_vsx_st(sum3, 48, _autoc);
+	vec_vsx_st(sum0, 0, autoc);
+	vec_vsx_st(sum1, 16, autoc);
+	vec_vsx_st(sum2, 32, autoc);
+	vec_vsx_st(sum3, 48, autoc);
+	vec_vsx_st(sum4, 64, autoc);
+	vec_vsx_st(sum5, 80, autoc);
+	vec_vsx_st(sum6, 96, autoc);
+	vec_vsx_st(sum7, 112, autoc);
 
 	for (; i < (long)data_len; i++) {
 		uint32_t coeff;
 
 		FLAC__real d = data[i];
 		for (coeff = 0; coeff < data_len - i; coeff++)
-			_autoc[coeff] += d * data[i+coeff];
-	}
-	for(i = 0; i < 16; i++){
-		autoc[i] = _autoc[i];
+			autoc[coeff] += d * data[i+coeff];
 	}
 }
 
@@ -514,38 +556,49 @@ void FLAC__lpc_compute_autocorrelation_intrin_power9_vsx_lag_16(const FLAC__real
 	long i;
 	long limit = (long)data_len - 16;
 	const FLAC__real *base;
-    FLAC__real _autoc[FLAC__MAX_LPC_ORDER+1];
-	vector float sum0 = { 0.0f, 0.0f, 0.0f, 0.0f};
-	vector float sum1 = { 0.0f, 0.0f, 0.0f, 0.0f};
-	vector float sum2 = { 0.0f, 0.0f, 0.0f, 0.0f};
-	vector float sum3 = { 0.0f, 0.0f, 0.0f, 0.0f};
-	vector float sum10 = { 0.0f, 0.0f, 0.0f, 0.0f};
-	vector float sum11 = { 0.0f, 0.0f, 0.0f, 0.0f};
-	vector float sum12 = { 0.0f, 0.0f, 0.0f, 0.0f};
-	vector float sum13 = { 0.0f, 0.0f, 0.0f, 0.0f};
-	vector float sum20 = { 0.0f, 0.0f, 0.0f, 0.0f};
-	vector float sum21 = { 0.0f, 0.0f, 0.0f, 0.0f};
-	vector float sum22 = { 0.0f, 0.0f, 0.0f, 0.0f};
-	vector float sum23 = { 0.0f, 0.0f, 0.0f, 0.0f};
-	vector float sum30 = { 0.0f, 0.0f, 0.0f, 0.0f};
-	vector float sum31 = { 0.0f, 0.0f, 0.0f, 0.0f};
-	vector float sum32 = { 0.0f, 0.0f, 0.0f, 0.0f};
-	vector float sum33 = { 0.0f, 0.0f, 0.0f, 0.0f};
+	vector double sum0 = { 0.0f, 0.0f};
+	vector double sum1 = { 0.0f, 0.0f};
+	vector double sum2 = { 0.0f, 0.0f};
+	vector double sum3 = { 0.0f, 0.0f};
+	vector double sum4 = { 0.0f, 0.0f};
+	vector double sum5 = { 0.0f, 0.0f};
+	vector double sum6 = { 0.0f, 0.0f};
+	vector double sum7 = { 0.0f, 0.0f};
+	vector double sum10 = { 0.0f, 0.0f};
+	vector double sum11 = { 0.0f, 0.0f};
+	vector double sum12 = { 0.0f, 0.0f};
+	vector double sum13 = { 0.0f, 0.0f};
+	vector double sum14 = { 0.0f, 0.0f};
+	vector double sum15 = { 0.0f, 0.0f};
+	vector double sum16 = { 0.0f, 0.0f};
+	vector double sum17 = { 0.0f, 0.0f};
+	vector double sum20 = { 0.0f, 0.0f};
+	vector double sum21 = { 0.0f, 0.0f};
+	vector double sum22 = { 0.0f, 0.0f};
+	vector double sum23 = { 0.0f, 0.0f};
+	vector double sum24 = { 0.0f, 0.0f};
+	vector double sum25 = { 0.0f, 0.0f};
+	vector double sum26 = { 0.0f, 0.0f};
+	vector double sum27 = { 0.0f, 0.0f};
+	vector double sum30 = { 0.0f, 0.0f};
+	vector double sum31 = { 0.0f, 0.0f};
+	vector double sum32 = { 0.0f, 0.0f};
+	vector double sum33 = { 0.0f, 0.0f};
+	vector double sum34 = { 0.0f, 0.0f};
+	vector double sum35 = { 0.0f, 0.0f};
+	vector double sum36 = { 0.0f, 0.0f};
+	vector double sum37 = { 0.0f, 0.0f};
 	vector float d0, d1, d2, d3, d4;
 #if WORDS_BIGENDIAN
 	vector unsigned int vsel1 = { 0x00000000, 0x00000000, 0x00000000, 0xFFFFFFFF };
 	vector unsigned int vsel2 = { 0x00000000, 0x00000000, 0xFFFFFFFF, 0xFFFFFFFF };
 	vector unsigned int vsel3 = { 0x00000000, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
-	vector unsigned int vperm1 = { 0x04050607, 0x08090A0B, 0x0C0D0E0F, 0x10111213 };
-	vector unsigned int vperm2 = { 0x08090A0B, 0x0C0D0E0F, 0x10111213, 0x14151617 };
-	vector unsigned int vperm3 = { 0x0C0D0E0F, 0x10111213, 0x14151617, 0x18191A1B };
+	vector unsigned long long vperm = { 0x08090A0B0C0D0E0F, 0x1011121314151617 };
 #else
 	vector unsigned int vsel1 = { 0xFFFFFFFF, 0x00000000, 0x00000000, 0x00000000 };
 	vector unsigned int vsel2 = { 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000, 0x00000000 };
 	vector unsigned int vsel3 = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000 };
-	vector unsigned int vperm1 = { 0x07060504, 0x0B0A0908, 0x0F0E0D0C, 0x13121110 };
-	vector unsigned int vperm2 = { 0x0B0A0908, 0x0F0E0D0C, 0x13121110, 0x17161514 };
-	vector unsigned int vperm3 = { 0x0F0E0D0C, 0x13121110, 0x17161514, 0x1B1A1918 };
+	vector unsigned long long vperm = { 0x0F0E0D0C0B0A0908, 0x1716151413121110 };
 #endif
 
 	(void) lag;
@@ -562,37 +615,69 @@ void FLAC__lpc_compute_autocorrelation_intrin_power9_vsx_lag_16(const FLAC__real
 	base += 16;
 
 	for (i = 0; i <= (limit-4); i += 4) {
-		vector float d, d0_orig = d0;
+		vector float d, mult, d0_orig = d0;
 
 		d4 = vec_vsx_ld(0, base);
 		base += 4;
 
 		d = vec_splat(d0_orig, 0);
-		sum0 += d0 * d;
-		sum1 += d1 * d;
-		sum2 += d2 * d;
-		sum3 += d3 * d;
+		mult = d0 * d;
+		sum0 += vec_doublel(mult);
+		sum1 += vec_doubleh(mult);
+		mult = d1 * d;
+		sum2 += vec_doublel(mult);
+		sum3 += vec_doubleh(mult);
+		mult = d2 * d;
+		sum4 += vec_doublel(mult);
+		sum5 += vec_doubleh(mult);
+		mult = d3 * d;
+		sum6 += vec_doublel(mult);
+		sum7 += vec_doubleh(mult);
 
 		d = vec_splat(d0_orig, 1);
 		d0 = vec_sel(d0_orig, d4, vsel1);
-		sum10 += d0 * d;
-		sum11 += d1 * d;
-		sum12 += d2 * d;
-		sum13 += d3 * d;
+		mult = d0 * d;
+		sum10 += vec_doublel(mult);
+		sum11 += vec_doubleh(mult);
+		mult = d1 * d;
+		sum12 += vec_doublel(mult);
+		sum13 += vec_doubleh(mult);
+		mult = d2 * d;
+		sum14 += vec_doublel(mult);
+		sum15 += vec_doubleh(mult);
+		mult = d3 * d;
+		sum16 += vec_doublel(mult);
+		sum17 += vec_doubleh(mult);
 
 		d = vec_splat(d0_orig, 2);
 		d0 = vec_sel(d0_orig, d4, vsel2);
-		sum20 += d0 * d;
-		sum21 += d1 * d;
-		sum22 += d2 * d;
-		sum23 += d3 * d;
+		mult = d0 * d;
+		sum20 += vec_doublel(mult);
+		sum21 += vec_doubleh(mult);
+		mult = d1 * d;
+		sum22 += vec_doublel(mult);
+		sum23 += vec_doubleh(mult);
+		mult = d2 * d;
+		sum24 += vec_doublel(mult);
+		sum25 += vec_doubleh(mult);
+		mult = d3 * d;
+		sum26 += vec_doublel(mult);
+		sum27 += vec_doubleh(mult);
 
 		d = vec_splat(d0_orig, 3);
 		d0 = vec_sel(d0_orig, d4, vsel3);
-		sum30 += d0 * d;
-		sum31 += d1 * d;
-		sum32 += d2 * d;
-		sum33 += d3 * d;
+		mult = d0 * d;
+		sum30 += vec_doublel(mult);
+		sum31 += vec_doubleh(mult);
+		mult = d1 * d;
+		sum32 += vec_doublel(mult);
+		sum33 += vec_doubleh(mult);
+		mult = d2 * d;
+		sum34 += vec_doublel(mult);
+		sum35 += vec_doubleh(mult);
+		mult = d3 * d;
+		sum36 += vec_doublel(mult);
+		sum37 += vec_doubleh(mult);
 
 		d0 = d1;
 		d1 = d2;
@@ -600,50 +685,49 @@ void FLAC__lpc_compute_autocorrelation_intrin_power9_vsx_lag_16(const FLAC__real
 		d3 = d4;
 	}
 
-	sum0 += vec_perm(sum10, sum11, (vector unsigned char)vperm1);
-	sum1 += vec_perm(sum11, sum12, (vector unsigned char)vperm1);
-	sum2 += vec_perm(sum12, sum13, (vector unsigned char)vperm1);
-	sum3 += vec_perm(sum13, sum10, (vector unsigned char)vperm1);
+	sum0 += vec_perm(sum10, sum11, (vector unsigned char)vperm);
+	sum1 += vec_perm(sum11, sum12, (vector unsigned char)vperm);
+	sum2 += vec_perm(sum12, sum13, (vector unsigned char)vperm);
+	sum3 += vec_perm(sum13, sum14, (vector unsigned char)vperm);
+	sum4 += vec_perm(sum14, sum15, (vector unsigned char)vperm);
+	sum5 += vec_perm(sum15, sum16, (vector unsigned char)vperm);
+	sum6 += vec_perm(sum16, sum17, (vector unsigned char)vperm);
+	sum7 += vec_perm(sum17, sum10, (vector unsigned char)vperm);
+	
+	sum0 += sum21;
+	sum1 += sum22;
+	sum2 += sum23;
+	sum3 += sum24;
+	sum4 += sum25;
+	sum5 += sum26;
+	sum6 += sum27;
+	sum7 += sum20;
+	
+	sum0 += vec_perm(sum31, sum32, (vector unsigned char)vperm);
+	sum1 += vec_perm(sum32, sum33, (vector unsigned char)vperm);
+	sum2 += vec_perm(sum33, sum34, (vector unsigned char)vperm);
+	sum3 += vec_perm(sum34, sum35, (vector unsigned char)vperm);
+	sum4 += vec_perm(sum35, sum36, (vector unsigned char)vperm);
+	sum5 += vec_perm(sum36, sum37, (vector unsigned char)vperm);
+	sum6 += vec_perm(sum37, sum30, (vector unsigned char)vperm);
+	sum7 += vec_perm(sum30, sum31, (vector unsigned char)vperm);
 
-	sum0 += vec_perm(sum20, sum21, (vector unsigned char)vperm2);
-	sum1 += vec_perm(sum21, sum22, (vector unsigned char)vperm2);
-	sum2 += vec_perm(sum22, sum23, (vector unsigned char)vperm2);
-	sum3 += vec_perm(sum23, sum20, (vector unsigned char)vperm2);
 
-	sum0 += vec_perm(sum30, sum31, (vector unsigned char)vperm3);
-	sum1 += vec_perm(sum31, sum32, (vector unsigned char)vperm3);
-	sum2 += vec_perm(sum32, sum33, (vector unsigned char)vperm3);
-	sum3 += vec_perm(sum33, sum30, (vector unsigned char)vperm3);
-
-	for (; i <= limit; i++) {
-		vector float d;
-
-		d0 = vec_vsx_ld(0, data+i);
-		d1 = vec_vsx_ld(16, data+i);
-		d2 = vec_vsx_ld(32, data+i);
-		d3 = vec_vsx_ld(48, data+i);
-
-		d = vec_splat(d0, 0);
-		sum0 += d0 * d;
-		sum1 += d1 * d;
-		sum2 += d2 * d;
-		sum3 += d3 * d;
-	}
-
-	vec_vsx_st(sum0, 0, _autoc);
-	vec_vsx_st(sum1, 16, _autoc);
-	vec_vsx_st(sum2, 32, _autoc);
-	vec_vsx_st(sum3, 48, _autoc);
+	vec_vsx_st(sum0, 0, autoc);
+	vec_vsx_st(sum1, 16, autoc);
+	vec_vsx_st(sum2, 32, autoc);
+	vec_vsx_st(sum3, 48, autoc);
+	vec_vsx_st(sum4, 64, autoc);
+	vec_vsx_st(sum5, 80, autoc);
+	vec_vsx_st(sum6, 96, autoc);
+	vec_vsx_st(sum7, 112, autoc);
 
 	for (; i < (long)data_len; i++) {
 		uint32_t coeff;
 
 		FLAC__real d = data[i];
 		for (coeff = 0; coeff < data_len - i; coeff++)
-			_autoc[coeff] += d * data[i+coeff];
-	}
-	for(i = 0; i < 16; i++){
-		autoc[i] = _autoc[i];
+			autoc[coeff] += d * data[i+coeff];
 	}
 }
 
