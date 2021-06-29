@@ -70,15 +70,6 @@ void FLAC__lpc_window_data(const FLAC__int32 in[], const FLAC__real window[], FL
  */
 void FLAC__lpc_compute_autocorrelation(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[]);
 #ifndef FLAC__NO_ASM
-#  ifdef FLAC__CPU_IA32
-#    ifdef FLAC__HAS_NASM
-void FLAC__lpc_compute_autocorrelation_asm_ia32(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[]);
-void FLAC__lpc_compute_autocorrelation_asm_ia32_sse_lag_4_old(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[]);
-void FLAC__lpc_compute_autocorrelation_asm_ia32_sse_lag_8_old(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[]);
-void FLAC__lpc_compute_autocorrelation_asm_ia32_sse_lag_12_old(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[]);
-void FLAC__lpc_compute_autocorrelation_asm_ia32_sse_lag_16_old(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[]);
-#    endif
-#  endif
 #  if (defined FLAC__CPU_IA32 || defined FLAC__CPU_X86_64) && FLAC__HAS_X86INTRIN
 #    ifdef FLAC__SSE_SUPPORTED
 void FLAC__lpc_compute_autocorrelation_intrin_sse_lag_4_old(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[]);

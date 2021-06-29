@@ -2,8 +2,6 @@ language: c
 
 os:   linux
 
-dist: focal
-
 compiler:
   - gcc
   - clang
