@@ -13,12 +13,12 @@ jobs:
     compiler: clang
     env: BUILD_SYSTEM="autotools" CONFIGURE_OPTS=
   - os: linux
-    dist: bionic
+    dist: focal
     arch: arm64
     compiler: gcc
     env: BUILD_SYSTEM="cmake" CONFIGURE_OPTS=
   - os: linux
-    dist: xenial
+    dist: focal
     arch: arm64
     compiler: clang
     env: BUILD_SYSTEM="cmake" CONFIGURE_OPTS=
@@ -33,12 +33,12 @@ jobs:
     compiler: clang
     env: BUILD_SYSTEM="autotools" CONFIGURE_OPTS=
   - os: linux
-    dist: bionic
+    dist: focal
     arch: ppc64le
     compiler: gcc
     env: BUILD_SYSTEM="cmake" CONFIGURE_OPTS=
   - os: linux
-    dist: xenial
+    dist: focal
     arch: ppc64le
     compiler: clang
     env: BUILD_SYSTEM="cmake" CONFIGURE_OPTS=
