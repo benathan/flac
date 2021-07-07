@@ -16,7 +16,7 @@ jobs:
     dist: focal
     arch: arm64
     compiler: gcc
-    env: BUILD_SYSTEM="cmake" CONFIGURE_OPTS=-DFLAC__HAS_A64NEONINTRIN=0
+    env: BUILD_SYSTEM="cmake" CONFIGURE_OPTS=-DFLAC__NO_ASM=0
   - os: linux
     dist: focal
     arch: arm64
@@ -26,7 +26,7 @@ jobs:
     dist: focal
     arch: ppc64le
     compiler: gcc
-    env: BUILD_SYSTEM="cmake" CONFIGURE_OPTS=-DFLAC__USE_VSX=0
+    env: BUILD_SYSTEM="cmake" CONFIGURE_OPTS=-DFLAC__NO_ASM=0
   - os: linux
     dist: focal
     arch: ppc64le
