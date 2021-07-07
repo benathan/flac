@@ -28,6 +28,9 @@
 #cmakedefine01 OGG_FOUND
 #define FLAC__HAS_OGG OGG_FOUND
 
+/* define if no asm optimizations (NEON, VSX, SSE, AVX) should be used */
+#cmakedefine FLAC__NO_ASM
+
 /* define if compiler has __attribute__((target("cpu=power8"))) support */
 #cmakedefine FLAC__HAS_TARGET_POWER8
 
