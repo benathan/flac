@@ -2,36 +2,36 @@ language: c
 
 jobs:
   include:
-  - os: linux
-    dist: xenial
-    arch: arm64
-    compiler: gcc
-    env: BUILD_SYSTEM="autotools" CONFIGURE_OPTS=
-  - os: linux
-    dist: xenial
-    arch: arm64
-    compiler: clang
-    env: BUILD_SYSTEM="autotools" CONFIGURE_OPTS=
-  - os: linux
-    dist: focal
-    arch: arm64
-    compiler: gcc
-    env: BUILD_SYSTEM="cmake" CONFIGURE_OPTS=
-  - os: linux
-    dist: xenial
-    arch: ppc64le
-    compiler: gcc
-    env: BUILD_SYSTEM="cmake" CONFIGURE_OPTS=
+#  - os: linux
+#    dist: xenial
+#    arch: arm64
+#    compiler: gcc
+#    env: BUILD_SYSTEM="autotools" CONFIGURE_OPTS=
+#  - os: linux
+#    dist: xenial
+#    arch: arm64
+#    compiler: clang
+#    env: BUILD_SYSTEM="autotools" CONFIGURE_OPTS=
+#  - os: linux
+#    dist: focal
+#    arch: arm64
+#    compiler: gcc
+#    env: BUILD_SYSTEM="cmake" CONFIGURE_OPTS=
   - os: linux
     dist: focal
     arch: ppc64le
     compiler: gcc
-    env: BUILD_SYSTEM="cmake" CONFIGURE_OPTS=
+    env: BUILD_SYSTEM="cmake" CONFIGURE_OPTS=-DFLAC__USE_VSX=0
   - os: linux
     dist: focal
     arch: ppc64le
-    compiler: clang
-    env: BUILD_SYSTEM="autotools" CONFIGURE_OPTS=
+    compiler: gcc
+    env: BUILD_SYSTEM="cmake" CONFIGURE_OPTS=
+#  - os: linux
+#    dist: focal
+#    arch: ppc64le
+#    compiler: clang
+#    env: BUILD_SYSTEM="autotools" CONFIGURE_OPTS=
 
 install:
   - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get -y install libtool-bin libogg-dev doxygen libxml2-utils w3c-sgml-lib; fi
