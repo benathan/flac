@@ -21,17 +21,17 @@ jobs:
     dist: xenial
     arch: ppc64le
     compiler: gcc
-    env: BUILD_SYSTEM="autotools" CONFIGURE_OPTS=
+    env: BUILD_SYSTEM="cmake" CONFIGURE_OPTS=
   - os: linux
     dist: focal
     arch: ppc64le
     compiler: gcc
-    env: BUILD_SYSTEM="autotools" CONFIGURE_OPTS=
+    env: BUILD_SYSTEM="cmake" CONFIGURE_OPTS=
   - os: linux
     dist: focal
     arch: ppc64le
     compiler: clang
-    env: BUILD_SYSTEM="cmake" CONFIGURE_OPTS=
+    env: BUILD_SYSTEM="autotools" CONFIGURE_OPTS=
 
 install:
   - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get -y install libtool-bin libogg-dev doxygen libxml2-utils w3c-sgml-lib; fi
