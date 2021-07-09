@@ -79,6 +79,12 @@
  * yielding compression within 0.1% of the optimal parameters.
  */
 #undef ENABLE_RICE_PARAMETER_SEARCH
+/* Some applications of FLAC involve storing very short samples with
+ * no need for metadata, for example samplers or certain (scientific)
+ * experiments or data collection. This parameter disables Vorbiscomment
+ * seektables and padding for these applications
+ */
+#define DISABLE_NONESSENTIAL_METADATA
 
 
 typedef struct {
@@ -1196,7 +1202,11 @@ static FLAC__StreamEncoderInitStatus init_stream_internal_(
 	if(encoder->protected_->verify)
 		encoder->private_->verify.state_hint = ENCODER_IN_METADATA;
 	encoder->private_->streaminfo.type = FLAC__METADATA_TYPE_STREAMINFO;
+#ifdef DISABLE_NONESSENTIAL_METADATA
+	encoder->private_->streaminfo.is_last = true;
+#else
 	encoder->private_->streaminfo.is_last = false; /* we will have at a minimum a VORBIS_COMMENT afterwards */
+#endif
 	encoder->private_->streaminfo.length = FLAC__STREAM_METADATA_STREAMINFO_LENGTH;
 	encoder->private_->streaminfo.data.stream_info.min_blocksize = encoder->protected_->blocksize; /* this encoder uses the same blocksize for the whole stream */
 	encoder->private_->streaminfo.data.stream_info.max_blocksize = encoder->protected_->blocksize;
@@ -1217,7 +1227,7 @@ static FLAC__StreamEncoderInitStatus init_stream_internal_(
 		/* the above function sets the state for us in case of an error */
 		return FLAC__STREAM_ENCODER_INIT_STATUS_ENCODER_ERROR;
 	}
-
+#ifndef DISABLE_NONESSENTIAL_METADATA
 	/*
 	 * Now that the STREAMINFO block is written, we can init this to an
 	 * absurdly-high value...
@@ -1269,7 +1279,7 @@ static FLAC__StreamEncoderInitStatus init_stream_internal_(
 			return FLAC__STREAM_ENCODER_INIT_STATUS_ENCODER_ERROR;
 		}
 	}
-
+#endif /* !defined DISABLE_NONESSENTIAL_METADATA  */
 	/* now that all the metadata is written, we save the stream offset */
 	if(encoder->private_->tell_callback && encoder->private_->tell_callback(encoder, &encoder->protected_->audio_offset, encoder->private_->client_data) == FLAC__STREAM_ENCODER_TELL_STATUS_ERROR) { /* FLAC__STREAM_ENCODER_TELL_STATUS_UNSUPPORTED just means we didn't get the offset; no error */
 		encoder->protected_->state = FLAC__STREAM_ENCODER_CLIENT_ERROR;
