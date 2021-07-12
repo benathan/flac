@@ -98,6 +98,7 @@ static struct share__option long_options_[] = {
 	{ "test"                  , share__no_argument, 0, 't' },
 	{ "stdout"                , share__no_argument, 0, 'c' },
 	{ "silent"                , share__no_argument, 0, 's' },
+	{ "silent-but-progress"   , share__no_argument, 0, 0 },
 	{ "totally-silent"        , share__no_argument, 0, 0 },
 	{ "warnings-as-errors"    , share__no_argument, 0, 'w' },
 	{ "force"                 , share__no_argument, 0, 'f' },
@@ -662,6 +663,9 @@ int parse_option(int short_option, const char *long_option, const char *option_a
 		FLAC__ASSERT(0 != long_option);
 		if(0 == strcmp(long_option, "totally-silent")) {
 			flac__utils_verbosity_ = 0;
+		}
+		else if(0 == strcmp(long_option, "silent-but-progress")) {
+			flac__utils_verbosity_ = 42;
 		}
 		else if(0 == strcmp(long_option, "delete-input-file")) {
 			option_values.delete_input = true;

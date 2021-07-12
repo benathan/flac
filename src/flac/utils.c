@@ -153,7 +153,7 @@ static FLAC__uint64 local__find_closest_cue_(const FLAC__StreamMetadata_CueSheet
 
 void flac__utils_printf(FILE *stream, int level, const char *format, ...)
 {
-	if(flac__utils_verbosity_ >= level) {
+	if(flac__utils_verbosity_ >= level && (flac__utils_verbosity_ < 42 || flac__utils_verbosity_ < 2)) {
 		va_list args;
 
 		FLAC__ASSERT(0 != format);
@@ -232,14 +232,17 @@ void stats_print_name(int level, const char *name)
 {
 	int len;
 
-	if (flac__utils_verbosity_ >= level) {
+	if(flac__utils_verbosity_ >= level && (flac__utils_verbosity_ < 42)) {
 		stats_clear();
 		if(is_name_printed) return;
 
 		console_width = get_console_width();
 		len = strlen_console(name)+2;
 		console_chars_left = console_width  - (len % console_width);
-		flac_fprintf(stderr, "%s: ", name);
+		if(flac__utils_verbosity_ == 42)
+			flac_fprintf(stderr, "  ");
+		else if(flac__utils_verbosity_ >= level)
+			flac_fprintf(stderr, "%s: ", name);
 		is_name_printed = true;
 	}
 }
@@ -255,7 +258,7 @@ void stats_print_info(int level, const char *format, ...)
 		len = flac_vsnprintf(tmp, sizeof(tmp), format, args);
 		va_end(args);
 		stats_clear();
-		if (len >= console_chars_left) {
+		if (len >= console_chars_left && flac__utils_verbosity_ < 42) {
 			clear_len = console_chars_left;
 			while (clear_len > 0 && clear_len--) fprintf(stderr, " ");
 			fprintf(stderr, "\n");
