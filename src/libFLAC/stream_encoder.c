@@ -3771,6 +3771,8 @@ uint32_t evaluate_fixed_subframe_(
 		subframe->data.fixed.warmup[i] = signal[i];
 
 	estimate = FLAC__SUBFRAME_ZERO_PAD_LEN + FLAC__SUBFRAME_TYPE_LEN + FLAC__SUBFRAME_WASTED_BITS_FLAG_LEN + subframe->wasted_bits + (order * subframe_bps) + residual_bits;
+	if(estimate < residual_bits) // estimate has overflown
+		estimate = residual_bits;
 
 #if SPOTCHECK_ESTIMATE
 	spotcheck_subframe_estimate_(encoder, blocksize, subframe_bps, subframe, estimate);
@@ -3857,6 +3859,8 @@ uint32_t evaluate_lpc_subframe_(
 		subframe->data.lpc.warmup[i] = signal[i];
 
 	estimate = FLAC__SUBFRAME_ZERO_PAD_LEN + FLAC__SUBFRAME_TYPE_LEN + FLAC__SUBFRAME_WASTED_BITS_FLAG_LEN + subframe->wasted_bits + FLAC__SUBFRAME_LPC_QLP_COEFF_PRECISION_LEN + FLAC__SUBFRAME_LPC_QLP_SHIFT_LEN + (order * (qlp_coeff_precision + subframe_bps)) + residual_bits;
+	if(estimate < residual_bits) // estimate has overflown
+		estimate = residual_bits;
 
 #if SPOTCHECK_ESTIMATE
 	spotcheck_subframe_estimate_(encoder, blocksize, subframe_bps, subframe, estimate);
