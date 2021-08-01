@@ -12,6 +12,9 @@
 /* Target processor AARCH64 (64-bit ARM) */
 #cmakedefine01 FLAC__CPU_AARCH64
 
+/* Target processor PPC */
+#cmakedefine01 FLAC__CPU_PPC
+
 /* Target processor PPC64 */
 #cmakedefine01 FLAC__CPU_PPC64
 
