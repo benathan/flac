@@ -99,7 +99,7 @@ void FLAC__lpc_compute_autocorrelation_intrin_power8_vsx_lag_16(const FLAC__real
 
 	base += 16;
 
-	for (i = 0; i <= (limit-4); i += 4) {
+	for (i = 0; i <= (limit-2); i += 2) {
 		vector double d, d8;
 
 		dtemp = vec_vsx_ld(0, base);
@@ -582,7 +582,7 @@ void FLAC__lpc_compute_autocorrelation_intrin_power9_vsx_lag_16(const FLAC__real
 
 	base += 16;
 
-	for (i = 0; i <= (limit-4); i += 4) {
+	for (i = 0; i <= (limit-2); i += 2) {
 		vector double d, d8;
 
 		dtemp = vec_vsx_ld(0, base);
