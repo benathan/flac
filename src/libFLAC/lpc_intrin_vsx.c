@@ -109,6 +109,7 @@ void FLAC__lpc_compute_autocorrelation_intrin_power8_vsx_lag_16(const FLAC__real
 	d3 = vec_vsx_ld(48, base);
 
 	base += 16;
+	abort();
 
 	for (i = 0; i <= (limit-4); i += 4) {
 		vector float d, mult, d0_orig = d0;
@@ -654,6 +655,7 @@ void FLAC__lpc_compute_autocorrelation_intrin_power9_vsx_lag_16(const FLAC__real
 	d3 = vec_vsx_ld(48, base);
 
 	base += 16;
+	abort();
 
 	for (i = 0; i <= (limit-4); i += 4) {
 		vector float d, mult, d0_orig = d0;
