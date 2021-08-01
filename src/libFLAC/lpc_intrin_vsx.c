@@ -56,7 +56,7 @@ void FLAC__lpc_compute_autocorrelation_intrin_power8_vsx_lag_16(const FLAC__real
 	for(i = 0; i < 16; i++)
 		autoc[i] = 0.0;
 
-	for (i = 0; i < (long)(data_len - 16); i++) {
+	for (i = 0; i < ((long)(data_len) - 16); i++) {
 		autoc[0] += data[i] * data[i];
 		autoc[1] += data[i] * data[i+1];
 		autoc[2] += data[i] * data[i+2];
@@ -93,7 +93,7 @@ void FLAC__lpc_compute_autocorrelation_intrin_power8_vsx_lag_12(const FLAC__real
 	for(i = 0; i < 12; i++)
 		autoc[i] = 0.0;
 
-	for (i = 0; i < (long)(data_len - 12); i++) {
+	for (i = 0; i < ((long)(data_len) - 12); i++) {
 		autoc[0] += data[i] * data[i];
 		autoc[1] += data[i] * data[i+1];
 		autoc[2] += data[i] * data[i+2];
@@ -126,7 +126,7 @@ void FLAC__lpc_compute_autocorrelation_intrin_power8_vsx_lag_8(const FLAC__real 
 	for(i = 0; i < 8; i++)
 		autoc[i] = 0.0;
 
-	for (i = 0; i < (long)(data_len - 8); i++) {
+	for (i = 0; i < ((long)(data_len) - 8); i++) {
 		autoc[0] += data[i] * data[i];
 		autoc[1] += data[i] * data[i+1];
 		autoc[2] += data[i] * data[i+2];
@@ -155,7 +155,7 @@ void FLAC__lpc_compute_autocorrelation_intrin_power8_vsx_lag_4(const FLAC__real 
 	for(i = 0; i < 4; i++)
 		autoc[i] = 0.0;
 
-	for (i = 0; i < (long)(data_len - 4); i++) {
+	for (i = 0; i < ((long)(data_len) - 4); i++) {
 		autoc[0] += data[i] * data[i];
 		autoc[1] += data[i] * data[i+1];
 		autoc[2] += data[i] * data[i+2];
@@ -182,7 +182,7 @@ void FLAC__lpc_compute_autocorrelation_intrin_power9_vsx_lag_16(const FLAC__real
 	for(i = 0; i < 16; i++)
 		autoc[i] = 0.0;
 
-	for (i = 0; i < (long)(data_len - 16); i++) {
+	for (i = 0; i < ((long)(data_len) - 16); i++) {
 		autoc[0] += data[i] * data[i];
 		autoc[1] += data[i] * data[i+1];
 		autoc[2] += data[i] * data[i+2];
@@ -219,7 +219,7 @@ void FLAC__lpc_compute_autocorrelation_intrin_power9_vsx_lag_12(const FLAC__real
 	for(i = 0; i < 12; i++)
 		autoc[i] = 0.0;
 
-	for (i = 0; i < (long)(data_len - 12); i++) {
+	for (i = 0; i < ((long)(data_len) - 12); i++) {
 		autoc[0] += data[i] * data[i];
 		autoc[1] += data[i] * data[i+1];
 		autoc[2] += data[i] * data[i+2];
@@ -252,7 +252,7 @@ void FLAC__lpc_compute_autocorrelation_intrin_power9_vsx_lag_8(const FLAC__real 
 	for(i = 0; i < 8; i++)
 		autoc[i] = 0.0;
 
-	for (i = 0; i < (long)(data_len - 8); i++) {
+	for (i = 0; i < ((long)(data_len) - 8); i++) {
 		autoc[0] += data[i] * data[i];
 		autoc[1] += data[i] * data[i+1];
 		autoc[2] += data[i] * data[i+2];
@@ -281,7 +281,7 @@ void FLAC__lpc_compute_autocorrelation_intrin_power9_vsx_lag_4(const FLAC__real 
 	for(i = 0; i < 4; i++)
 		autoc[i] = 0.0;
 
-	for (i = 0; i < (long)(data_len - 4); i++) {
+	for (i = 0; i < ((long)(data_len) - 4); i++) {
 		autoc[0] += data[i] * data[i];
 		autoc[1] += data[i] * data[i+1];
 		autoc[2] += data[i] * data[i+2];
