@@ -28,4 +28,4 @@ install:
 
 script:
   - if [[ "${BUILD_SYSTEM}" == "autotools" ]]; then ./autogen.sh && ./configure $CONFIGURE_OPTS && make && make check; fi
-  - if [[ "${BUILD_SYSTEM}" == "cmake" ]]; then mkdir cmake-build && cd cmake-build && cmake .. -DCMAKE_BUILD_TYPE=Release $CONFIGURE_OPTS && cat config.h && cmake --build . && ctest; fi
+  - if [[ "${BUILD_SYSTEM}" == "cmake" ]]; then mkdir cmake-build && cd cmake-build && cmake .. -DCMAKE_BUILD_TYPE=Release $CONFIGURE_OPTS && cat config.h && cmake --build . && ctest -V; fi
