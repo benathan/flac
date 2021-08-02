@@ -30,6 +30,9 @@
 /* define if you are compiling for x86 and have the NASM assembler */
 #cmakedefine FLAC__HAS_NASM
 
+/* define if no asm optimizations (NEON, VSX, SSE, AVX) should be used */
+#cmakedefine FLAC__NO_ASM
+
 /* define if you have the ogg library */
 #cmakedefine01 OGG_FOUND
 #define FLAC__HAS_OGG OGG_FOUND
