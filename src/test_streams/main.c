@@ -947,16 +947,16 @@ static FLAC__bool generate_noisy_sine(void)
 {
 	FILE *f;
 	int64_t randstate = 0x1243456;
-	double sample, last_val = 0.0;
+	double sample, last_val = 0.0, freq_shift;
 	int k;
 
 	if(0 == (f = fopen("noisy-sine.wav", "wb")))
 		return false;
 
-	if(!write_simple_wavex_header (f, 44100, 1, 2, 220500))
+	if(!write_simple_wavex_header (f, 44100, 2, 2, 2646000))
 		goto foo;
 
-	for (k = 0 ; k < 5 * 44100 ; k++) {
+	for (k = 0 ; k < 120 * 44100 ; k++) {
 		/* Obvioulsy not a crypto quality RNG. */
 		randstate = 11117 * randstate + 211231;
 		randstate = 11117 * randstate + 211231;
@@ -967,8 +967,14 @@ static FLAC__bool generate_noisy_sine(void)
 
 		last_val = sample;
 
-		sample += sin (2.0 * k * M_PI * 1.0 / 32.0);
-		sample *= 0.4;
+		freq_shift = (4e6+(double)k)/4e6;
+		sample += 0.8 * sin (2.0 * k * M_PI * 1.0 / 10.0 * freq_shift);
+		sample += 1.2 * sin (2.0 * k * M_PI * 1.0 / 32.0 / freq_shift);
+		sample += 1.6 * sin (2.0 * k * M_PI * 1.0 / 90.0 * freq_shift);
+		sample += 2.0 * sin (2.0 * k * M_PI * 1.0 / 268.0 / freq_shift);
+		sample *= 0.2;
+		if(sample > 1.0)  sample = 1.0;
+		if(sample < -1.0) sample = -1.0;
 #if !defined _MSC_VER
 		write_little_endian_int16(f, lrintf(sample * 32700.0));
 #else
