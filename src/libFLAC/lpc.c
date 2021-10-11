@@ -63,11 +63,31 @@ static inline long int lround(double x) {
 /* If this fails, we are in the presence of a mid 90's compiler, move along... */
 #endif
 
-void FLAC__lpc_window_data(const FLAC__int32 in[], const FLAC__real window[], FLAC__real out[], uint32_t data_len)
+void FLAC__lpc_window_data(const FLAC__int32 in[], const FLAC__real window[], FLAC__real out[], uint32_t data_len, uint32_t * output_data_len)
 {
-	uint32_t i;
-	for(i = 0; i < data_len; i++)
+	uint32_t i = 0, j = 0, k;
+#if 1
+	/* Partial_tukey and punchout_tukey apodizations leave quite a
+	 * few samples where window[i] is zero. To be able to skip these,
+	 * every 16 samples window[i] is checked for being zero. If it is
+	 * zero, the first nonzero window[i] is searched for, otherwise
+	 * 16 samples are processed */
+	for(; (i + 16) < data_len; )
+		if(window[i] > 1e-10f){
+			/* In case window isn't zero at i, process 16 samples */
+			for(k = 0; k < 16; k++)
+				out[j+k] = in[i+k] * window[i+k];
+			i+=16;
+			j+=16;
+		}else{
+			/* Skip until window is no longer zero */
+			for(;(window[i] < 1e-10f) && (i < data_len); i++){}
+		}
+#endif
+	for(; i < data_len; i++)
 		out[i] = in[i] * window[i];
+
+	*output_data_len = j;
 }
 
 void FLAC__lpc_compute_autocorrelation(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[])

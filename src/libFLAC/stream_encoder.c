@@ -3523,8 +3523,11 @@ FLAC__bool process_subframe_(
 				if(max_lpc_order > 0) {
 					uint32_t a;
 					for (a = 0; a < encoder->protected_->num_apodizations; a++) {
-						FLAC__lpc_window_data(integer_signal, encoder->private_->window[a], encoder->private_->windowed_signal, frame_header->blocksize);
-						encoder->private_->local_lpc_compute_autocorrelation(encoder->private_->windowed_signal, frame_header->blocksize, max_lpc_order+1, autoc);
+						uint32_t window_length;
+						FLAC__lpc_window_data(integer_signal, encoder->private_->window[a], encoder->private_->windowed_signal, frame_header->blocksize, &window_length);
+						if(window_length <= (max_lpc_order + 1))
+							continue;
+						encoder->private_->local_lpc_compute_autocorrelation(encoder->private_->windowed_signal, window_length, max_lpc_order+1, autoc);
 						/* if autoc[0] == 0.0, the signal is constant and we usually won't get here, but it can happen */
 						if(autoc[0] != 0.0) {
 							FLAC__lpc_compute_lp_coefficients(autoc, &max_lpc_order, encoder->private_->lp_coeff, lpc_error);
