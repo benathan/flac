@@ -1826,14 +1826,7 @@ FLAC_API FLAC__bool FLAC__stream_encoder_set_do_escape_coding(FLAC__StreamEncode
 	FLAC__ASSERT(0 != encoder->protected_);
 	if(encoder->protected_->state != FLAC__STREAM_ENCODER_UNINITIALIZED)
 		return false;
-#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
-	/* was deprecated since FLAC 1.0.4 (24-Sep-2002), but is needed for
-	 * full spec coverage, so this should be reenabled at some point.
-	 * For now only enable while fuzzing */
-	encoder->protected_->do_escape_coding = value;
-#else
-	(void)value;
-#endif
+	encoder->protected_->do_escape_coding = true;
 	return true;
 }
 
@@ -4115,6 +4108,8 @@ uint32_t find_best_partition_order_(
 		memcpy(prc->parameters, private_->partitioned_rice_contents_extra[best_parameters_index].parameters, (uint32_t)sizeof(uint32_t)*(1<<(best_partition_order)));
 		if(do_escape_coding)
 			memcpy(prc->raw_bits, private_->partitioned_rice_contents_extra[best_parameters_index].raw_bits, (uint32_t)sizeof(uint32_t)*(1<<(best_partition_order)));
+		else
+			memset(prc->raw_bits, UINT32_MAX, (uint32_t)sizeof(uint32_t)*(1<<(best_partition_order)));
 		/*
 		 * Now need to check if the type should be changed to
 		 * FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE2 based on the
@@ -4226,17 +4221,35 @@ void precompute_partition_info_escapes_(
 			partition_samples = default_partition_samples;
 			if(partition == 0)
 				partition_samples -= predictor_order;
-			rmax = 0;
+			rmax = UINT32_MAX;
 			for(partition_sample = 0; partition_sample < partition_samples; partition_sample++) {
 				r = residual[residual_sample++];
-				/* OPT: maybe faster: rmax |= r ^ (r>>31) */
+				/* This code used to be
+				rmax = 0;
+				[....]
 				if(r < 0)
 					rmax |= ~r;
 				else
 					rmax |= r;
+				which means negative values get one added and is useful for calculating
+				whether the largest value fits [-rmax-1,rmax] instead of [-rmax,rmax].
+				It was however not possible to discern whether a partition really had only
+				zeroes. Now, instead of negative values getting one added, positive values
+				get one subtracted, which we will compensate for after detecting whether a
+				partition truly has only zeroes. */
+				if(r > 0)
+					rmax &= ~r;
+				else
+					rmax &= r;
 			}
 			/* now we know all residual values are in the range [-rmax-1,rmax] */
-			raw_bits_per_partition[partition] = rmax? FLAC__bitmath_ilog2(rmax) + 2 : 1;
+			if(rmax == UINT32_MAX)
+				/* All samples were 0 */
+				raw_bits_per_partition[partition] = 0;
+			else {
+				rmax = ~rmax;
+				raw_bits_per_partition[partition] = rmax? FLAC__bitmath_ilog2(rmax) + 2 : 1;
+			}
 		}
 		to_partition = partitions;
 		break; /*@@@ yuck, should remove the 'for' loop instead */
@@ -4422,13 +4435,13 @@ FLAC__bool set_partitioned_rice_(
 #endif
 		if(search_for_escapes) {
 			partition_bits = FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE2_PARAMETER_LEN + FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE_RAW_LEN + raw_bits_per_partition[partition] * partition_samples;
-			if(partition_bits <= best_partition_bits && raw_bits_per_partition[partition] < 32) {
+			if(partition_bits <= best_partition_bits && raw_bits_per_partition[partition] < (1u << FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE_RAW_LEN)) {
 				raw_bits[partition] = raw_bits_per_partition[partition];
 				best_rice_parameter = 0; /* will be converted to appropriate escape parameter later */
 				best_partition_bits = partition_bits;
 			}
 			else
-				raw_bits[partition] = 0;
+				raw_bits[partition] = UINT32_MAX;
 		}
 		parameters[partition] = best_rice_parameter;
 		if(best_partition_bits < UINT32_MAX - bits_) // To make sure _bits doesn't overflow

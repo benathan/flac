@@ -522,7 +522,7 @@ FLAC__bool add_residual_partitioned_rice_(FLAC__BitWriter *bw, const FLAC__int32
 	if(partition_order == 0) {
 		uint32_t i;
 
-		if(raw_bits[0] == 0) {
+		if(raw_bits[0] >= (1u << FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE_RAW_LEN)) {
 			if(!FLAC__bitwriter_write_raw_uint32(bw, rice_parameters[0], plen))
 				return false;
 			if(!FLAC__bitwriter_write_rice_signed_block(bw, residual, residual_samples, rice_parameters[0]))
@@ -550,13 +550,12 @@ FLAC__bool add_residual_partitioned_rice_(FLAC__BitWriter *bw, const FLAC__int32
 			if(i == 0)
 				partition_samples -= predictor_order;
 			k += partition_samples;
-			if(raw_bits[i] == 0) {
+			if(raw_bits[i] >= (1u << FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE_RAW_LEN)) {
 				if(!FLAC__bitwriter_write_raw_uint32(bw, rice_parameters[i], plen))
 					return false;
 				if(!FLAC__bitwriter_write_rice_signed_block(bw, residual+k_last, k-k_last, rice_parameters[i]))
 					return false;
-			}
-			else {
+			} else {
 				if(!FLAC__bitwriter_write_raw_uint32(bw, pesc, plen))
 					return false;
 				if(!FLAC__bitwriter_write_raw_uint32(bw, raw_bits[i], FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE_RAW_LEN))
