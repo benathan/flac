@@ -2184,10 +2184,23 @@ FLAC__bool EncoderSession_init_encoder(EncoderSession *e, encode_options_t optio
 	else
 		e->outputfile_opened = true;
 
-	e->stats_frames_interval =
-		(FLAC__stream_encoder_get_do_exhaustive_model_search(e->encoder) && FLAC__stream_encoder_get_do_qlp_coeff_prec_search(e->encoder))? 0x1f :
-		(FLAC__stream_encoder_get_do_exhaustive_model_search(e->encoder) || FLAC__stream_encoder_get_do_qlp_coeff_prec_search(e->encoder))? 0x3f :
-		0xff;
+	{
+		uint32_t blocksize = FLAC__stream_encoder_get_blocksize(e->encoder);
+		uint32_t max_lpc_order = FLAC__stream_encoder_get_max_lpc_order(e->encoder);
+		if(max_lpc_order == 0) {
+			e->stats_frames_interval = 0x600000 / blocksize / (3 + FLAC__stream_encoder_get_do_exhaustive_model_search(e->encoder));
+		}
+		else {
+			e->stats_frames_interval = 0x400000 / blocksize / (max_lpc_order / 2);
+			if(FLAC__stream_encoder_get_do_exhaustive_model_search(e->encoder))
+				e->stats_frames_interval = (e->stats_frames_interval / (max_lpc_order / 2)) + 1;
+			if(FLAC__stream_encoder_get_do_qlp_coeff_prec_search(e->encoder))
+				e->stats_frames_interval = (e->stats_frames_interval / 5) + 1;
+		}
+#ifdef _WIN32
+	e->stats_frames_interval = (e->stats_frames_interval / 4) + 1; /* Console on Windows takes particularly much time to render stats */
+#endif
+	}
 
 	static_metadata_clear(&static_metadata);
 
