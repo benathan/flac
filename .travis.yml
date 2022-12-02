@@ -12,6 +12,11 @@ jobs:
     arch: ppc64le
     compiler: gcc
     env: BUILD_SYSTEM="cmake" CONFIGURE_OPTS=
+  - os: linux
+    dist: focal
+    arch: ppc64le
+    compiler: gcc
+    env: BUILD_SYSTEM="cmake" CONFIGURE_OPTS="-DWITH_ASM=0 -DWITH_FAST=0"
 
 install:
   - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get -y install libtool-bin libogg-dev; fi
