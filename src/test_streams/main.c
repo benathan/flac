@@ -1037,7 +1037,7 @@ static FLAC__bool generate_noisy_sine(void)
 	int64_t randstate = 0x1243456;
 	double sample, last_val = 0.0;
 	int k;
-	int seconds = 300;
+	int seconds = 600;
 
 	if(0 == (f = fopen("noisy-sine.wav", "wb")))
 		return false;

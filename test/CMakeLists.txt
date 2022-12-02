@@ -40,7 +40,7 @@ endif()
 
 configure_file(common.sh.in common.sh @ONLY)
 
-set(ALL_TESTS libFLAC grabbag)
+set(ALL_TESTS libFLAC)
 
 add_test(NAME libFLAC
     COMMAND ${BUSYBOX_EXE} ${BUSYBOX_CMD} "${CMAKE_CURRENT_SOURCE_DIR}/test_libFLAC.sh"
@@ -51,41 +51,37 @@ if(BUILD_CXXLIBS)
         WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
     list(APPEND ALL_TESTS libFLAC++)
 endif()
-file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/cuesheets")
-add_test(NAME grabbag
-    COMMAND ${BUSYBOX_EXE} ${BUSYBOX_CMD} "${CMAKE_CURRENT_SOURCE_DIR}/test_grabbag.sh"
-    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 if(BUILD_PROGRAMS)
-    add_test(NAME flac
-        COMMAND ${BUSYBOX_EXE} ${BUSYBOX_CMD} "${CMAKE_CURRENT_SOURCE_DIR}/test_flac.sh"
+    add_test(NAME generate_streams
+        COMMAND ${BUSYBOX_EXE} ${BUSYBOX_CMD} "${CMAKE_CURRENT_SOURCE_DIR}/generate.sh"
         WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
-    # UTF-8 must be tested separately on Windows because busybox-w32 doesn't support UTF-8
-    if(BUSYBOX_EXE)
-        add_test(NAME flac_utf8_test COMMAND $<TARGET_FILE:flacapp> -t
-            "${CMAKE_CURRENT_SOURCE_DIR}/flac-to-flac-metadata-test-files/שלום.flac"
-            "${CMAKE_CURRENT_SOURCE_DIR}/flac-to-flac-metadata-test-files/Prøve.flac"
-            "${CMAKE_CURRENT_SOURCE_DIR}/flac-to-flac-metadata-test-files/🤔.flac")
-        list(APPEND ALL_TESTS flac_utf8_test)
-    endif()
-    file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/metaflac-test-files")
-    add_test(NAME metaflac
-        COMMAND ${BUSYBOX_EXE} ${BUSYBOX_CMD} "${CMAKE_CURRENT_SOURCE_DIR}/test_metaflac.sh"
-        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
-    add_test(NAME replaygain
-        COMMAND ${BUSYBOX_EXE} ${BUSYBOX_CMD} "${CMAKE_CURRENT_SOURCE_DIR}/test_replaygain.sh"
-        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
-    add_test(NAME seeking
-        COMMAND ${BUSYBOX_EXE} ${BUSYBOX_CMD} "${CMAKE_CURRENT_SOURCE_DIR}/test_seeking.sh"
-        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
-    add_test(NAME streams
-        COMMAND ${BUSYBOX_EXE} ${BUSYBOX_CMD} "${CMAKE_CURRENT_SOURCE_DIR}/test_streams.sh"
-        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
-    #   increase this if standard 1500 seconds are not enough
-    #   set_tests_properties(streams PROPERTIES TIMEOUT 1500)
-    add_test(NAME compression
+    add_test(NAME compression1
         COMMAND ${BUSYBOX_EXE} ${BUSYBOX_CMD} "${CMAKE_CURRENT_SOURCE_DIR}/test_compression.sh"
         WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
-    list(APPEND ALL_TESTS flac metaflac replaygain seeking streams compression)
+    add_test(NAME compression2
+        COMMAND ${BUSYBOX_EXE} ${BUSYBOX_CMD} "${CMAKE_CURRENT_SOURCE_DIR}/test_compression.sh"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+    add_test(NAME compression3
+        COMMAND ${BUSYBOX_EXE} ${BUSYBOX_CMD} "${CMAKE_CURRENT_SOURCE_DIR}/test_compression.sh"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+    add_test(NAME compression4
+        COMMAND ${BUSYBOX_EXE} ${BUSYBOX_CMD} "${CMAKE_CURRENT_SOURCE_DIR}/test_compression.sh"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+    add_test(NAME compression5
+        COMMAND ${BUSYBOX_EXE} ${BUSYBOX_CMD} "${CMAKE_CURRENT_SOURCE_DIR}/test_compression.sh"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+    add_test(NAME compression6
+        COMMAND ${BUSYBOX_EXE} ${BUSYBOX_CMD} "${CMAKE_CURRENT_SOURCE_DIR}/test_compression.sh"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+    add_test(NAME compression7
+        COMMAND ${BUSYBOX_EXE} ${BUSYBOX_CMD} "${CMAKE_CURRENT_SOURCE_DIR}/test_compression.sh"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+    add_test(NAME compression8
+        COMMAND ${BUSYBOX_EXE} ${BUSYBOX_CMD} "${CMAKE_CURRENT_SOURCE_DIR}/test_compression.sh"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+
+
+    list(APPEND ALL_TESTS generate_streams compression1 compression2 compression3 compression4 compression5 compression6 compression7 compression8)
 endif()
 
 
