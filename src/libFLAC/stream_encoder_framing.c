@@ -494,9 +494,8 @@ FLAC__bool FLAC__subframe_add_verbatim(const FLAC__Subframe_Verbatim *subframe, 
 
 		FLAC__ASSERT(subframe_bps < 33);
 
-		for(i = 0; i < samples; i++)
-			if(!FLAC__bitwriter_write_raw_int32(bw, signal[i], subframe_bps))
-				return false;
+		if(!FLAC__bitwriter_write_raw_bits_block(bw, signal, samples, subframe_bps))
+			return false;
 	}
 	else {
 		const FLAC__int64 *signal = subframe->data.int64;
@@ -533,8 +532,6 @@ FLAC__bool add_residual_partitioned_rice_(FLAC__BitWriter *bw, const FLAC__int32
 	const uint32_t pesc = is_extended? FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE2_ESCAPE_PARAMETER : FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER;
 
 	if(partition_order == 0) {
-		uint32_t i;
-
 		if(raw_bits[0] == 0) {
 			if(!FLAC__bitwriter_write_raw_uint32(bw, rice_parameters[0], plen))
 				return false;
@@ -547,15 +544,13 @@ FLAC__bool add_residual_partitioned_rice_(FLAC__BitWriter *bw, const FLAC__int32
 				return false;
 			if(!FLAC__bitwriter_write_raw_uint32(bw, raw_bits[0], FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE_RAW_LEN))
 				return false;
-			for(i = 0; i < residual_samples; i++) {
-				if(!FLAC__bitwriter_write_raw_int32(bw, residual[i], raw_bits[0]))
-					return false;
-			}
+			if(!FLAC__bitwriter_write_raw_bits_block(bw, residual, residual_samples, raw_bits[0]))
+				return false;
 		}
 		return true;
 	}
 	else {
-		uint32_t i, j, k = 0, k_last = 0;
+		uint32_t i, k = 0, k_last = 0;
 		uint32_t partition_samples;
 		const uint32_t default_partition_samples = (residual_samples+predictor_order) >> partition_order;
 		for(i = 0; i < (1u<<partition_order); i++) {
@@ -574,10 +569,8 @@ FLAC__bool add_residual_partitioned_rice_(FLAC__BitWriter *bw, const FLAC__int32
 					return false;
 				if(!FLAC__bitwriter_write_raw_uint32(bw, raw_bits[i], FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE_RAW_LEN))
 					return false;
-				for(j = k_last; j < k; j++) {
-					if(!FLAC__bitwriter_write_raw_int32(bw, residual[j], raw_bits[i]))
-						return false;
-				}
+				if(!FLAC__bitwriter_write_raw_bits_block(bw, residual+k_last, k-k_last, raw_bits[i]))
+					return false;
 			}
 			k_last = k;
 		}

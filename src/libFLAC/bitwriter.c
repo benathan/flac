@@ -702,6 +702,67 @@ FLAC__bool FLAC__bitwriter_write_rice_signed_block(FLAC__BitWriter *bw, const FL
 	return true;
 }
 
+FLAC__bool FLAC__bitwriter_write_raw_bits_block(FLAC__BitWriter *bw, const FLAC__int32 *vals, uint32_t nvals, uint32_t bits_per_val)
+{
+	FLAC__int32 nvals_per_word, nvals_after_loop, bits_per_loop, i;
+	FLAC__int32 mask;
+	FLAC__ASSERT(0 != bw);
+	FLAC__ASSERT(0 != bw->buffer);
+
+	/* grow capacity upfront to prevent constant reallocation during writes */
+	if(bw->capacity * FLAC__BITS_PER_WORD <= bw->words * FLAC__BITS_PER_WORD + bw->bits + nvals * bits_per_val && !bitwriter_grow_(bw, nvals * bits_per_val))
+		return false;
+
+	if(bits_per_val == 0)
+		return true;
+	if(bits_per_val > 32)
+		return false;
+
+	mask = UINT32_MAX >> (32 - bits_per_val);
+	nvals_per_word = FLAC__BITS_PER_WORD/bits_per_val;
+	nvals_after_loop = (FLAC__int32)(nvals) - nvals_per_word;
+	bits_per_loop = nvals_per_word * bits_per_val;
+
+	/* first work with vals in groups as large as possible */
+	while(nvals_after_loop > -1) {
+		bwword accumulator = 0;
+		FLAC__int32 left = FLAC__BITS_PER_WORD - bw->bits;
+		for(i = 0; i < nvals_per_word; i++) {
+			accumulator <<= bits_per_val;
+			accumulator |= (vals[i] & mask);
+		}
+		if(bits_per_loop < left) {
+			bw->accum <<= bits_per_loop;
+			bw->accum |= accumulator;
+			bw->bits += bits_per_loop;
+		}
+		else if(bw->bits) { /* This will probably happen most often */
+			bw->accum <<= left;
+			bw->accum |= accumulator >> (bw->bits = bits_per_loop - left);
+			bw->buffer[bw->words++] = SWAP_BE_WORD_TO_HOST(bw->accum);
+			bw->accum = accumulator; /* MSBs will be shifted out later */
+		}
+		else {
+			/* at this point bits_per_loop == FLAC__BITS_PER_WORD  and  bw->bits == 0
+			 * This needs to be handled separately because shifting a n-bit int by n bit
+			 * is undefined behaviour */
+			bw->buffer[bw->words++] = SWAP_BE_WORD_TO_HOST(accumulator);
+		}
+		vals += nvals_per_word;
+		nvals_after_loop -= nvals_per_word;
+	}
+
+	nvals = nvals_after_loop + nvals_per_word;
+	/* now take care of the remainder of vals */
+	for(i = 0; i < (int)nvals; i++)
+		if(!FLAC__bitwriter_write_raw_int32(bw, vals[i], bits_per_val))
+			return false;
+
+	return true;
+}
+
+
+
 #if 0 /* UNUSED */
 FLAC__bool FLAC__bitwriter_write_golomb_signed(FLAC__BitWriter *bw, int val, uint32_t parameter)
 {
