@@ -821,6 +821,7 @@ FLAC_API FLAC__bool FLAC__stream_encoder_set_sample_rate(FLAC__StreamEncoder *en
  * - FLAC__stream_encoder_set_qlp_coeff_precision()
  * - FLAC__stream_encoder_set_do_qlp_coeff_prec_search()
  * - FLAC__stream_encoder_set_do_escape_coding()
+ * - FLAC__stream_encoder_set_escape_coding_advantage()
  * - FLAC__stream_encoder_set_do_exhaustive_model_search()
  * - FLAC__stream_encoder_set_min_residual_partition_order()
  * - FLAC__stream_encoder_set_max_residual_partition_order()
@@ -837,20 +838,21 @@ FLAC_API FLAC__bool FLAC__stream_encoder_set_sample_rate(FLAC__StreamEncoder *en
  *  <td>qlp coeff precision</td>
  *  <td>qlp coeff prec search</td>
  *  <td>escape coding</td>
+ *  <td>escape coding advantage</td>
  *  <td>exhaustive model search</td>
  *  <td>min residual partition order</td>
  *  <td>max residual partition order</td>
  *  <td>rice parameter search dist</td>
  * </tr>
- * <tr>  <td><b>0</b></td> <td>false</td> <td>false</td> <td>tukey(0.5)</td>         <td>0</td>  <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>3</td> <td>0</td> </tr>
- * <tr>  <td><b>1</b></td> <td>true</td>  <td>true</td>  <td>tukey(0.5)</td>         <td>0</td>  <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>3</td> <td>0</td> </tr>
- * <tr>  <td><b>2</b></td> <td>true</td>  <td>false</td> <td>tukey(0.5)</td>         <td>0</td>  <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>3</td> <td>0</td> </tr>
- * <tr>  <td><b>3</b></td> <td>false</td> <td>false</td> <td>tukey(0.5)</td>         <td>6</td>  <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>4</td> <td>0</td> </tr>
- * <tr>  <td><b>4</b></td> <td>true</td>  <td>true</td>  <td>tukey(0.5)</td>         <td>8</td>  <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>4</td> <td>0</td> </tr>
- * <tr>  <td><b>5</b></td> <td>true</td>  <td>false</td> <td>tukey(0.5)</td>         <td>8</td>  <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>5</td> <td>0</td> </tr>
- * <tr>  <td><b>6</b></td> <td>true</td>  <td>false</td> <td>subdivide_tukey(2)</td> <td>8</td>  <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>6</td> <td>0</td> </tr>
- * <tr>  <td><b>7</b></td> <td>true</td>  <td>false</td> <td>subdivide_tukey(2)</td> <td>12</td> <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>6</td> <td>0</td> </tr>
- * <tr>  <td><b>8</b></td> <td>true</td>  <td>false</td> <td>subdivide_tukey(2)</td> <td>12</td> <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>6</td> <td>0</td> </tr>
+ * <tr>  <td><b>0</b></td> <td>false</td> <td>false</td> <td>tukey(0.5)</td>         <td>0</td>  <td>0</td> <td>false</td> <td>false</td> <td>4</td> <td>false</td> <td>0</td> <td>3</td> <td>0</td> </tr>
+ * <tr>  <td><b>1</b></td> <td>true</td>  <td>true</td>  <td>tukey(0.5)</td>         <td>0</td>  <td>0</td> <td>false</td> <td>false</td> <td>0</td> <td>false</td> <td>0</td> <td>3</td> <td>0</td> </tr>
+ * <tr>  <td><b>2</b></td> <td>true</td>  <td>false</td> <td>tukey(0.5)</td>         <td>0</td>  <td>0</td> <td>false</td> <td>false</td> <td>0</td> <td>false</td> <td>0</td> <td>3</td> <td>0</td> </tr>
+ * <tr>  <td><b>3</b></td> <td>false</td> <td>false</td> <td>tukey(0.5)</td>         <td>6</td>  <td>0</td> <td>false</td> <td>false</td> <td>0</td> <td>false</td> <td>0</td> <td>4</td> <td>0</td> </tr>
+ * <tr>  <td><b>4</b></td> <td>true</td>  <td>true</td>  <td>tukey(0.5)</td>         <td>8</td>  <td>0</td> <td>false</td> <td>false</td> <td>0</td> <td>false</td> <td>0</td> <td>4</td> <td>0</td> </tr>
+ * <tr>  <td><b>5</b></td> <td>true</td>  <td>false</td> <td>tukey(0.5)</td>         <td>8</td>  <td>0</td> <td>false</td> <td>false</td> <td>0</td> <td>false</td> <td>0</td> <td>5</td> <td>0</td> </tr>
+ * <tr>  <td><b>6</b></td> <td>true</td>  <td>false</td> <td>subdivide_tukey(2)</td> <td>8</td>  <td>0</td> <td>false</td> <td>false</td> <td>0</td> <td>false</td> <td>0</td> <td>6</td> <td>0</td> </tr>
+ * <tr>  <td><b>7</b></td> <td>true</td>  <td>false</td> <td>subdivide_tukey(2)</td> <td>12</td> <td>0</td> <td>false</td> <td>false</td> <td>0</td> <td>false</td> <td>0</td> <td>6</td> <td>0</td> </tr>
+ * <tr>  <td><b>8</b></td> <td>true</td>  <td>false</td> <td>subdivide_tukey(2)</td> <td>12</td> <td>0</td> <td>false</td> <td>false</td> <td>0</td> <td>false</td> <td>0</td> <td>6</td> <td>0</td> </tr>
  * </table>
  *
  * \default \c 5
@@ -1030,7 +1032,10 @@ FLAC_API FLAC__bool FLAC__stream_encoder_set_qlp_coeff_precision(FLAC__StreamEnc
  */
 FLAC_API FLAC__bool FLAC__stream_encoder_set_do_qlp_coeff_prec_search(FLAC__StreamEncoder *encoder, FLAC__bool value);
 
-/** Deprecated.  Setting this value has no effect.
+/** Set to \c true to search for escape codes in the entropy coding stage.
+ *  This generally results in a neglicable improvement in compression,
+ *  but can be used with FLAC__stream_encoder_set_escape_coding_advantage()
+ *  to improve encoding and decoding speed.
  *
  * \default \c false
  * \param  encoder  An encoder instance to set.
@@ -1041,6 +1046,30 @@ FLAC_API FLAC__bool FLAC__stream_encoder_set_do_qlp_coeff_prec_search(FLAC__Stre
  *    \c false if the encoder is already initialized, else \c true.
  */
 FLAC_API FLAC__bool FLAC__stream_encoder_set_do_escape_coding(FLAC__StreamEncoder *encoder, FLAC__bool value);
+
+/** Set the maximum amount of space an escaped Rice partition can
+ *  take up extra compared to a non-escaped partition, expressed
+ *  in 1/4 bits per sample. For example, when escape coding is
+ *  enabled with FLAC__stream_encoder_set_do_escape_coding()
+ *  and the escape coding advantage is set to 4, an escaped
+ *  partition with 256 samples may take up 256 bits more than
+ *  a its non-escaped counterpart to be selected.
+ *
+ *  Using this function will result in less compression, but
+ *  usually this trades-off for higher encoding and decoding
+ *  speed. This is because in escaped partitions, all symbols
+ *  have equal length, making writing and reading them easier
+ *  and (on most CPUs) faster.
+ *
+ * \default \c 0
+ * \param  encoder  An encoder instance to set.
+ * \param  value    Escape coding advantage in 1/4 bits per sample. See above.
+ * \assert
+ *    \code encoder != NULL \endcode
+ * \retval FLAC__bool
+ *    \c false if the encoder is already initialized, else \c true.
+ */
+FLAC_API FLAC__bool FLAC__stream_encoder_set_escape_coding_advantage(FLAC__StreamEncoder *encoder, uint32_t value);
 
 /** Set to \c false to let the encoder estimate the best model order
  *  based on the residual signal energy, or \c true to force the
@@ -1404,6 +1433,16 @@ FLAC_API FLAC__bool FLAC__stream_encoder_get_do_qlp_coeff_prec_search(const FLAC
  *    See FLAC__stream_encoder_set_do_escape_coding().
  */
 FLAC_API FLAC__bool FLAC__stream_encoder_get_do_escape_coding(const FLAC__StreamEncoder *encoder);
+
+/** Get the escape coding advantage.
+ *
+ * \param  encoder  An encoder instance to query.
+ * \assert
+ *    \code encoder != NULL \endcode
+ * \retval uint32_t
+ *    See FLAC__stream_encoder_set_escape_coding_advantage().
+ */
+FLAC_API uint32_t FLAC__stream_encoder_get_escape_coding_advantage(const FLAC__StreamEncoder *encoder);
 
 /** Get the exhaustive model search flag.
  *

@@ -115,21 +115,22 @@ static const  struct CompressionLevels {
 	uint32_t qlp_coeff_precision;
 	FLAC__bool do_qlp_coeff_prec_search;
 	FLAC__bool do_escape_coding;
+	uint32_t escape_coding_advantage;
 	FLAC__bool do_exhaustive_model_search;
 	uint32_t min_residual_partition_order;
 	uint32_t max_residual_partition_order;
 	uint32_t rice_parameter_search_dist;
 	const char *apodization;
 } compression_levels_[] = {
-	{ false, false,  0, 0, false, false, false, 0, 3, 0, "tukey(5e-1)" },
-	{ true , true ,  0, 0, false, false, false, 0, 3, 0, "tukey(5e-1)" },
-	{ true , false,  0, 0, false, false, false, 0, 3, 0, "tukey(5e-1)" },
-	{ false, false,  6, 0, false, false, false, 0, 4, 0, "tukey(5e-1)" },
-	{ true , true ,  8, 0, false, false, false, 0, 4, 0, "tukey(5e-1)" },
-	{ true , false,  8, 0, false, false, false, 0, 5, 0, "tukey(5e-1)" },
-	{ true , false,  8, 0, false, false, false, 0, 6, 0, "subdivide_tukey(2)" },
-	{ true , false, 12, 0, false, false, false, 0, 6, 0, "subdivide_tukey(2)" },
-	{ true , false, 12, 0, false, false, false, 0, 6, 0, "subdivide_tukey(3)" }
+	{ false, false,  0, 0, false, true,  4, false, 0, 3, 0, "tukey(5e-1)" },
+	{ true , true ,  0, 0, false, false, 0, false, 0, 3, 0, "tukey(5e-1)" },
+	{ true , false,  0, 0, false, false, 0, false, 0, 3, 0, "tukey(5e-1)" },
+	{ false, false,  6, 0, false, false, 0, false, 0, 4, 0, "tukey(5e-1)" },
+	{ true , true ,  8, 0, false, false, 0, false, 0, 4, 0, "tukey(5e-1)" },
+	{ true , false,  8, 0, false, false, 0, false, 0, 5, 0, "tukey(5e-1)" },
+	{ true , false,  8, 0, false, false, 0, false, 0, 6, 0, "subdivide_tukey(2)" },
+	{ true , false, 12, 0, false, false, 0, false, 0, 6, 0, "subdivide_tukey(2)" },
+	{ true , false, 12, 0, false, false, 0, false, 0, 6, 0, "subdivide_tukey(3)" }
 	/* here we use locale-independent 5e-1 instead of 0.5 or 0,5 */
 };
 
@@ -208,6 +209,7 @@ static uint32_t evaluate_fixed_subframe_(
 	uint32_t min_partition_order,
 	uint32_t max_partition_order,
 	FLAC__bool do_escape_coding,
+	uint32_t escape_coding_advantage,
 	uint32_t rice_parameter_search_dist,
 	FLAC__Subframe *subframe,
 	FLAC__EntropyCodingMethod_PartitionedRiceContents *partitioned_rice_contents
@@ -229,6 +231,7 @@ static uint32_t evaluate_lpc_subframe_(
 	uint32_t min_partition_order,
 	uint32_t max_partition_order,
 	FLAC__bool do_escape_coding,
+	uint32_t escape_coding_advantage,
 	uint32_t rice_parameter_search_dist,
 	FLAC__Subframe *subframe,
 	FLAC__EntropyCodingMethod_PartitionedRiceContents *partitioned_rice_contents
@@ -255,6 +258,7 @@ static uint32_t find_best_partition_order_(
 	uint32_t max_partition_order,
 	uint32_t bps,
 	FLAC__bool do_escape_coding,
+	uint32_t escape_coding_advantage,
 	uint32_t rice_parameter_search_dist,
 	FLAC__EntropyCodingMethod *best_ecm
 );
@@ -290,6 +294,7 @@ static FLAC__bool set_partitioned_rice_(
 	const uint32_t rice_parameter_search_dist,
 	const uint32_t partition_order,
 	const FLAC__bool search_for_escapes,
+	const uint32_t escape_coding_advantage,
 	FLAC__EntropyCodingMethod_PartitionedRiceContents *partitioned_rice_contents,
 	uint32_t *bits
 );
@@ -1671,6 +1676,7 @@ FLAC_API FLAC__bool FLAC__stream_encoder_set_compression_level(FLAC__StreamEncod
 	ok &= FLAC__stream_encoder_set_qlp_coeff_precision         (encoder, compression_levels_[value].qlp_coeff_precision);
 	ok &= FLAC__stream_encoder_set_do_qlp_coeff_prec_search    (encoder, compression_levels_[value].do_qlp_coeff_prec_search);
 	ok &= FLAC__stream_encoder_set_do_escape_coding            (encoder, compression_levels_[value].do_escape_coding);
+	ok &= FLAC__stream_encoder_set_escape_coding_advantage     (encoder, compression_levels_[value].escape_coding_advantage);
 	ok &= FLAC__stream_encoder_set_do_exhaustive_model_search  (encoder, compression_levels_[value].do_exhaustive_model_search);
 	ok &= FLAC__stream_encoder_set_min_residual_partition_order(encoder, compression_levels_[value].min_residual_partition_order);
 	ok &= FLAC__stream_encoder_set_max_residual_partition_order(encoder, compression_levels_[value].max_residual_partition_order);
@@ -1879,14 +1885,18 @@ FLAC_API FLAC__bool FLAC__stream_encoder_set_do_escape_coding(FLAC__StreamEncode
 	FLAC__ASSERT(0 != encoder->protected_);
 	if(encoder->protected_->state != FLAC__STREAM_ENCODER_UNINITIALIZED)
 		return false;
-#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
-	/* was deprecated since FLAC 1.0.4 (24-Sep-2002), but is needed for
-	 * full spec coverage, so this should be reenabled at some point.
-	 * For now only enable while fuzzing */
 	encoder->protected_->do_escape_coding = value;
-#else
-	(void)value;
-#endif
+	return true;
+}
+
+FLAC_API FLAC__bool FLAC__stream_encoder_set_escape_coding_advantage(FLAC__StreamEncoder *encoder, uint32_t value)
+{
+	FLAC__ASSERT(0 != encoder);
+	FLAC__ASSERT(0 != encoder->private_);
+	FLAC__ASSERT(0 != encoder->protected_);
+	if(encoder->protected_->state != FLAC__STREAM_ENCODER_UNINITIALIZED)
+		return false;
+	encoder->protected_->escape_coding_advantage = value;
 	return true;
 }
 
@@ -2201,6 +2211,14 @@ FLAC_API FLAC__bool FLAC__stream_encoder_get_do_escape_coding(const FLAC__Stream
 	return encoder->protected_->do_escape_coding;
 }
 
+FLAC_API uint32_t FLAC__stream_encoder_get_escape_coding_advantage(const FLAC__StreamEncoder *encoder)
+{
+	FLAC__ASSERT(0 != encoder);
+	FLAC__ASSERT(0 != encoder->private_);
+	FLAC__ASSERT(0 != encoder->protected_);
+	return encoder->protected_->escape_coding_advantage;
+}
+
 FLAC_API FLAC__bool FLAC__stream_encoder_get_do_exhaustive_model_search(const FLAC__StreamEncoder *encoder)
 {
 	FLAC__ASSERT(0 != encoder);
@@ -2457,6 +2475,7 @@ void set_defaults_(FLAC__StreamEncoder *encoder)
 	encoder->protected_->do_qlp_coeff_prec_search = false;
 	encoder->protected_->do_exhaustive_model_search = false;
 	encoder->protected_->do_escape_coding = false;
+	encoder->protected_->escape_coding_advantage = 0;
 	encoder->protected_->min_residual_partition_order = 0;
 	encoder->protected_->max_residual_partition_order = 0;
 	encoder->protected_->rice_parameter_search_dist = 0;
@@ -3641,6 +3660,7 @@ FLAC__bool process_subframe_(
 							min_partition_order,
 							max_partition_order,
 							encoder->protected_->do_escape_coding,
+							encoder->protected_->escape_coding_advantage,
 							encoder->protected_->rice_parameter_search_dist,
 							subframe[!_best_subframe],
 							partitioned_rice_contents[!_best_subframe]
@@ -3714,6 +3734,7 @@ FLAC__bool process_subframe_(
 										min_partition_order,
 										max_partition_order,
 										encoder->protected_->do_escape_coding,
+										encoder->protected_->escape_coding_advantage,
 										encoder->protected_->rice_parameter_search_dist,
 										subframe[!_best_subframe],
 										partitioned_rice_contents[!_best_subframe]
@@ -3954,6 +3975,7 @@ uint32_t evaluate_fixed_subframe_(
 	uint32_t min_partition_order,
 	uint32_t max_partition_order,
 	FLAC__bool do_escape_coding,
+	uint32_t escape_coding_advantage,
 	uint32_t rice_parameter_search_dist,
 	FLAC__Subframe *subframe,
 	FLAC__EntropyCodingMethod_PartitionedRiceContents *partitioned_rice_contents
@@ -3988,6 +4010,7 @@ uint32_t evaluate_fixed_subframe_(
 			max_partition_order,
 			subframe_bps,
 			do_escape_coding,
+			escape_coding_advantage,
 			rice_parameter_search_dist,
 			&subframe->data.fixed.entropy_coding_method
 		);
@@ -4029,6 +4052,7 @@ uint32_t evaluate_lpc_subframe_(
 	uint32_t min_partition_order,
 	uint32_t max_partition_order,
 	FLAC__bool do_escape_coding,
+	uint32_t escape_coding_advantage,
 	uint32_t rice_parameter_search_dist,
 	FLAC__Subframe *subframe,
 	FLAC__EntropyCodingMethod_PartitionedRiceContents *partitioned_rice_contents
@@ -4087,6 +4111,7 @@ uint32_t evaluate_lpc_subframe_(
 			max_partition_order,
 			subframe_bps,
 			do_escape_coding,
+			escape_coding_advantage,
 			rice_parameter_search_dist,
 			&subframe->data.lpc.entropy_coding_method
 		);
@@ -4161,6 +4186,7 @@ uint32_t find_best_partition_order_(
 	uint32_t max_partition_order,
 	uint32_t bps,
 	FLAC__bool do_escape_coding,
+	uint32_t escape_coding_advantage,
 	uint32_t rice_parameter_search_dist,
 	FLAC__EntropyCodingMethod *best_ecm
 )
@@ -4199,6 +4225,7 @@ uint32_t find_best_partition_order_(
 					rice_parameter_search_dist,
 					(uint32_t)partition_order,
 					do_escape_coding,
+					escape_coding_advantage,
 					&private_->partitioned_rice_contents_extra[!best_parameters_index],
 					&residual_bits
 				)
@@ -4415,6 +4442,7 @@ FLAC__bool set_partitioned_rice_(
 	const uint32_t rice_parameter_search_dist,
 	const uint32_t partition_order,
 	const FLAC__bool search_for_escapes,
+	const uint32_t escape_coding_advantage,
 	FLAC__EntropyCodingMethod_PartitionedRiceContents *partitioned_rice_contents,
 	uint32_t *bits
 )
@@ -4524,7 +4552,8 @@ FLAC__bool set_partitioned_rice_(
 		}
 #endif
 		if(search_for_escapes) {
-			partition_bits = FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE2_PARAMETER_LEN + FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE_RAW_LEN + raw_bits_per_partition[partition] * partition_samples;
+			partition_bits = FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE2_PARAMETER_LEN + FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE_RAW_LEN +
+			                 ((((raw_bits_per_partition[partition] << 2) - escape_coding_advantage) * partition_samples) >> 2);
 			if(partition_bits <= best_partition_bits && raw_bits_per_partition[partition] < 32) {
 				raw_bits[partition] = raw_bits_per_partition[partition];
 				best_rice_parameter = 0; /* will be converted to appropriate escape parameter later */

@@ -108,6 +108,7 @@ typedef struct FLAC__StreamEncoderProtected {
 	FLAC__bool do_qlp_coeff_prec_search;
 	FLAC__bool do_exhaustive_model_search;
 	FLAC__bool do_escape_coding;
+	uint32_t escape_coding_advantage;
 	uint32_t min_residual_partition_order;
 	uint32_t max_residual_partition_order;
 	uint32_t rice_parameter_search_dist;
