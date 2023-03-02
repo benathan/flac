@@ -60,6 +60,9 @@ extern void FLAC__precompute_partition_info_sums_intrin_ssse3(const FLAC__int32 
 #ifdef FLAC__AVX2_SUPPORTED
 extern void FLAC__precompute_partition_info_sums_intrin_avx2(const FLAC__int32 residual[], FLAC__uint64 abs_residual_partition_sums[],
 			uint32_t residual_samples, uint32_t predictor_order, uint32_t min_partition_order, uint32_t max_partition_order, uint32_t bps);
+extern void FLAC__precompute_partition_info_sums_and_escapes_intrin_avx2(const FLAC__int32 residual[], FLAC__uint64 abs_residual_partition_sums[],
+			uint32_t raw_bits_per_partition[], uint32_t residual_samples, uint32_t predictor_order, uint32_t min_partition_order,
+			uint32_t max_partition_order, uint32_t bps);
 #endif
 
 #endif

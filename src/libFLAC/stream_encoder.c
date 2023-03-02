@@ -372,6 +372,7 @@ typedef struct FLAC__StreamEncoderPrivate {
 	FLAC__MD5Context md5context;
 	FLAC__CPUInfo cpuinfo;
 	void (*local_precompute_partition_info_sums)(const FLAC__int32 residual[], FLAC__uint64 abs_residual_partition_sums[], uint32_t residual_samples, uint32_t predictor_order, uint32_t min_partition_order, uint32_t max_partition_order, uint32_t bps);
+	void (*local_precompute_partition_info_sums_and_escapes)(const FLAC__int32 residual[], FLAC__uint64 abs_residual_partition_sums[], uint32_t raw_bits_per_partition[], uint32_t residual_samples, uint32_t predictor_order, uint32_t min_partition_order, uint32_t max_partition_order, uint32_t bps);
 #ifndef FLAC__INTEGER_ONLY_LIBRARY
 	uint32_t (*local_fixed_compute_best_predictor)(const FLAC__int32 data[], uint32_t data_len, float residual_bits_per_sample[FLAC__MAX_FIXED_ORDER+1]);
 	uint32_t (*local_fixed_compute_best_predictor_wide)(const FLAC__int32 data[], uint32_t data_len, float residual_bits_per_sample[FLAC__MAX_FIXED_ORDER+1]);
@@ -931,6 +932,7 @@ static FLAC__StreamEncoderInitStatus init_stream_internal_(
 	encoder->private_->local_lpc_compute_autocorrelation = FLAC__lpc_compute_autocorrelation;
 #endif
 	encoder->private_->local_precompute_partition_info_sums = precompute_partition_info_sums_;
+	encoder->private_->local_precompute_partition_info_sums_and_escapes = NULL;
 	encoder->private_->local_fixed_compute_best_predictor = FLAC__fixed_compute_best_predictor;
 	encoder->private_->local_fixed_compute_best_predictor_wide = FLAC__fixed_compute_best_predictor_wide;
 	encoder->private_->local_fixed_compute_best_predictor_limit_residual = FLAC__fixed_compute_best_predictor_limit_residual;
@@ -1090,8 +1092,10 @@ static FLAC__StreamEncoderInitStatus init_stream_internal_(
 			encoder->private_->local_precompute_partition_info_sums = FLAC__precompute_partition_info_sums_intrin_ssse3;
 #  endif
 #  ifdef FLAC__AVX2_SUPPORTED
-		if (encoder->private_->cpuinfo.x86.avx2)
+		if (encoder->private_->cpuinfo.x86.avx2) {
 			encoder->private_->local_precompute_partition_info_sums = FLAC__precompute_partition_info_sums_intrin_avx2;
+			encoder->private_->local_precompute_partition_info_sums_and_escapes = FLAC__precompute_partition_info_sums_and_escapes_intrin_avx2;
+		}
 #  endif
 # endif /* FLAC__CPU_... */
 	}
@@ -4169,10 +4173,13 @@ uint32_t find_best_partition_order_(
 	max_partition_order = FLAC__format_get_max_rice_partition_order_from_blocksize_limited_max_and_predictor_order(max_partition_order, blocksize, predictor_order);
 	min_partition_order = flac_min(min_partition_order, max_partition_order);
 
-	private_->local_precompute_partition_info_sums(residual, abs_residual_partition_sums, residual_samples, predictor_order, min_partition_order, max_partition_order, bps);
-
-	if(do_escape_coding)
-		precompute_partition_info_escapes_(residual, raw_bits_per_partition, residual_samples, predictor_order, min_partition_order, max_partition_order);
+	if(do_escape_coding && private_->local_precompute_partition_info_sums_and_escapes != NULL)
+		private_->local_precompute_partition_info_sums_and_escapes(residual, abs_residual_partition_sums, raw_bits_per_partition, residual_samples, predictor_order, min_partition_order, max_partition_order, bps);
+	else {
+		private_->local_precompute_partition_info_sums(residual, abs_residual_partition_sums, residual_samples, predictor_order, min_partition_order, max_partition_order, bps);
+		if(do_escape_coding)
+			precompute_partition_info_escapes_(residual, raw_bits_per_partition, residual_samples, predictor_order, min_partition_order, max_partition_order);
+	}
 
 	{
 		int partition_order;
