@@ -149,7 +149,7 @@ int iconvert(const char *fromcode, const char *tocode,
       iconv_close(cd1);
       return ret;
     }
-    newbuf = safe_realloc_add_2op_(utfbuf, (ob - utfbuf), /*+*/1);
+    newbuf = safe_realloc_nofree_add_2op_(utfbuf, (ob - utfbuf), /*+*/1);
     if (!newbuf)
       goto fail;
     ob = (ob - utfbuf) + newbuf;
@@ -161,6 +161,8 @@ int iconvert(const char *fromcode, const char *tocode,
 
   /* Truncate the buffer to be tidy */
   utflen = ob - utfbuf;
+  if (utflen == 0)
+    goto fail;
   newbuf = realloc(utfbuf, utflen);
   if (!newbuf)
     goto fail;
